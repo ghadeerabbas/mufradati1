@@ -227,22 +227,56 @@ const lvlNeed=l=>{if(l<8)return CFG.xp.level*l;let n=CFG.xp.level*7;for(let k=8;
 function carryDays(){const o=new Set,k=R.sk;if(!k||!(k.n>0)||!/^\d{4}-\d\d-\d\d$/.test(k.t||""))return o;
   const t=new Date(k.t+"T12:00:00").getTime();for(let i=0;i<Math.min(k.n,3650);i++)o.add(dkey(t-i*DAY));return o}
 // أيام أنهى فيها تحدّيًا مع صديق (R.dd): تُحسب في السلسلة كيوم دراسة، بلا خبرة ولا جواهر
-const duelDays=()=>Array.isArray(R.dd)?R.dd.filter(d=>/^\d{4}-\d\d-\d\d$/.test(d)):[];
+// أرشيف دائم (لا يُقصّ): ما يتجاوز حدود السجلّات يُطوى هنا قبل القصّ، فلا تنقص الجواهر ولا السلسلة ولا الألبوم.
+// R.dda: أيام التحدّي المطويّة {"2026-11": قناع أيام الشهر}، R.qdg: جواهر صناديق المهام المطويّة، R.dwg: جواهر تحدّيات الأصدقاء المطويّة،
+// LG.hg: جوائز الدوري المطويّة، R.pza: قطع البازل {"2026-11": قناع القطع}. كل الطيّ اتحاد أو جمع لما يُحذف فقط، فلا يُحسب شيء مرتين.
+const DAYRE=/^\d{4}-\d\d-\d\d$/;
+const ddRaw=()=>Array.isArray(R.dd)?R.dd.filter(d=>DAYRE.test(d)):[];
+const duelDays=()=>{const o=ddRaw(),A=R.dda&&typeof R.dda==="object"?R.dda:{};
+  for(const m in A){const k=+A[m]||0;if(!/^\d{4}-\d\d$/.test(m))continue;for(let i=0;i<31;i++)if(k>>>i&1)o.push(m+"-"+String(i+1).padStart(2,"0"))}return o};
+// يقصّ سجلًّا إلى آخر n عنصرًا، ويطوي المحذوف بالدالة fold قبل الحذف
+const cutKeep=(a,n,fold)=>{if(a.length<=n)return a;fold(a.slice(0,a.length-n));return a.slice(-n)};
+const sumAt=(a,i)=>a.reduce((s,x)=>s+(+x[i]||0),0);
+// ===== نقطة حفظ سجلّ المراجعات =====
+// السجل LOG محدود الحجم. بدل حذف أوّله، تُطوى الأيام الكاملة القديمة في نقطة حفظ دائمة CK بالدالة نفسها التي يعيد بها econ() الحساب،
+// فتبقى الخبرة والمستوى والجواهر والسلسلة والإنجازات ومكافآت الحفظ والرسوخ كما لو كان السجل كاملًا. لا تتغيّر أي قاعدة.
+// CK = {v,t: وقت أول حدث بقي في السجل, reviews, xp (خبرة الأحداث ومكافآت الحفظ والرسوخ، بلا مكافأة اليوم),
+//       w: {كلمة: صندوقها×4 + 1 إن أخذت مكافأة الحفظ + 2 إن أخذت مكافأة الرسوخ} (رقم واحد لكل كلمة، لصغر الحجم),
+//       per: {يوم:[n,bad,clean,f]}, nights/earlies: أيام}
+let CK=null;
+const LOG_MAX=60000,LOG_KEEP=50000;   // يُطوى عند تجاوز 60000 حتى يبقى نحو 50000 (أيام كاملة)
+function ckState(){const c=CK||{},per={};for(const d in c.per||{}){const a=c.per[d];per[d]={n:a[0],bad:a[1],clean:a[2],f:a[3]}}
+  const box={},r4=new Set,r7=new Set;for(const k in c.w||{}){const v=c.w[k];box[k]=v>>2;if(v&1)r4.add(k);if(v&2)r7.add(k)}
+  return {reviews:c.reviews||0,xp:c.xp||0,box,r4,r7,per,nights:new Set(c.nights||[]),earlies:new Set(c.earlies||[]),bon:[]}}
+function replayLog(S,L){const {box,r4,r7,per,bon}=S;
+  for(const [t,k,r,nw] of L){
+    if(nw===2){box[k]=boxStep(box[k]||0,r,true);continue}      // التدريب لا يُحسب
+    S.reviews++;S.xp+=xpOf(r,nw);
+    const fr=nw>=3;   // الدراسة الحرّة: تُحفظ الكلمة وتُحسب، بلا خبرة
+    let b=nw===1||nw===4?1:boxStep(box[k]||0,r,false);box[k]=b;
+    if(b>=4&&!r4.has(k)){r4.add(k);if(!fr){S.xp+=CFG.xp.mem;bon.push([t,CFG.xp.mem])}}
+    if(b>=7&&!r7.has(k)){r7.add(k);if(!fr){S.xp+=CFG.xp.solid;bon.push([t,CFG.xp.solid])}}
+    const d=dkey(t);const x=(per[d]=per[d]||{n:0,bad:0,clean:0,f:0});x.n++;if(fr)x.f++;if(r===0)x.bad++;if(!x.bad)x.clean=x.n;
+    const h=hourOf(t);if(h>=23||h<4)S.nights.add(dkey(t-5*36e5));if(h>=4&&h<7)S.earlies.add(d);
+  }}
+function ckFold(){
+  if(LOG.length<=LOG_MAX)return false;
+  let L=LOG;for(let i=1;i<L.length;i++)if(L[i][0]<L[i-1][0]){L=[...LOG].sort((a,b)=>a[0]-b[0]);break}
+  const cut=dkey(L[L.length-LOG_KEEP][0]);let j=0;while(j<L.length&&dkey(L[j][0])<cut)j++;
+  if(!j)return false;
+  const S=ckState();replayLog(S,L.slice(0,j));const per={};for(const d in S.per){const x=S.per[d];per[d]=[x.n,x.bad,x.clean,x.f]}
+  const w={};for(const k of new Set([...Object.keys(S.box),...S.r4,...S.r7]))w[k]=((S.box[k]||0)<<2)|(S.r4.has(k)?1:0)|(S.r7.has(k)?2:0);
+  CK={v:1,t:L[j][0],reviews:S.reviews,xp:S.xp,w,per,nights:[...S.nights],earlies:[...S.earlies]};
+  LOG=L.slice(j);EC=null;return true}
 let EC=null;
 function econ(){
   const s={reviews:0,mem:0,mast:0,best:0,streak:0,perfect:0,maxDay:0,quizzes:QLOG.length,qfull:0,dayAll:0,night:0,early:0,items:0,freezes:0};const nights=new Set,earlies=new Set;
-  let gems=0,xp=0;const box={},r4=new Set,r7=new Set,per={},bon=[];   // bon: مكافآت الحفظ والرسوخ بوقتها، لتدخل خبرة الدوري أيضًا
+  let gems=0;
+  // الإعادة تبدأ من نقطة الحفظ (إن وُجدت) ثم تكمل بالسجل الحيّ: النتيجة نفسها كما لو كان السجل كاملًا
+  const S=ckState(),ckT=CK&&CK.t||0;
   let L=LOG;for(let i=1;i<L.length;i++)if(L[i][0]<L[i-1][0]){L=[...LOG].sort((a,b)=>a[0]-b[0]);break}
-  for(const [t,k,r,nw] of L){
-    if(nw===2){box[k]=boxStep(box[k]||0,r,true);continue}      // التدريب لا يُحسب
-    s.reviews++;xp+=xpOf(r,nw);
-    const fr=nw>=3;   // الدراسة الحرّة: تُحفظ الكلمة وتُحسب، بلا خبرة
-    let b=nw===1||nw===4?1:boxStep(box[k]||0,r,false);box[k]=b;
-    if(b>=4&&!r4.has(k)){r4.add(k);if(!fr){xp+=CFG.xp.mem;bon.push([t,CFG.xp.mem])}}
-    if(b>=7&&!r7.has(k)){r7.add(k);if(!fr){xp+=CFG.xp.solid;bon.push([t,CFG.xp.solid])}}
-    const d=dkey(t);const x=(per[d]=per[d]||{n:0,bad:0,clean:0,f:0});x.n++;if(fr)x.f++;if(r===0)x.bad++;if(!x.bad)x.clean=x.n;
-    const h=hourOf(t);if(h>=23||h<4)nights.add(dkey(t-5*36e5));if(h>=4&&h<7)earlies.add(d);
-  }
+  replayLog(S,ckT?L.filter(x=>x[0]>=ckT):L);
+  let xp=S.xp;s.reviews=S.reviews;const {r4,r7,per,bon}=S;for(const d of S.nights)nights.add(d);for(const d of S.earlies)earlies.add(d);
   s.mem=r4.size;s.mast=r7.size;s.night=nights.size;s.early=earlies.size;
   for(const d in per){const x=per[d];s.maxDay=Math.max(s.maxDay,x.n);if(x.clean>=20)s.perfect++;
     xp+=(x.n-(x.f||0)>=CFG.xp.dayN?CFG.xp.dayXp:0)}
@@ -275,10 +309,10 @@ function econ(){
   gems+=STN.filter(x=>x[2]!==0).length*CFG.gems.station;   // المحطة التي كل كلماتها كوفئ عليها قبل التصفير لا تعطي جوهرة
   for(const [d,g] of STREAK_G)if(s.best>=d&&d>(R.sb||0))gems+=g;
   gems+=R.bank||0;
-  gems+=(LG.hist||[]).reduce((a,h)=>a+(h.g||0),0);      // جوائز الدوري
+  gems+=(LG.hist||[]).reduce((a,h)=>a+(h.g||0),0)+(+LG.hg||0);      // جوائز الدوري (مع المطويّ منها)
   gems+=giftSum();                                      // هدايا المشرف
-  gems+=(Array.isArray(R.dw)?R.dw:[]).reduce((a,x)=>a+(+x[1]||0),0);   // الفوز في تحدّيات الأصدقاء
-  gems+=(Array.isArray(R.qd)?R.qd:[]).reduce((a,x)=>a+(+x[2]||0),0);   // صناديق مهام اليوم
+  gems+=(Array.isArray(R.dw)?R.dw:[]).reduce((a,x)=>a+(+x[1]||0),0)+(+R.dwg||0);   // الفوز في تحدّيات الأصدقاء (مع المطويّ منها)
+  gems+=(Array.isArray(R.qd)?R.qd:[]).reduce((a,x)=>a+(+x[2]||0),0)+(+R.qdg||0);   // صناديق مهام اليوم (مع المطويّ منها)
   // الملصقات أُلغيت: ما اشتُري منها لا يُحسب من الجواهر، فيعود ثمنه إلى الرصيد (ويبقى في السجلّ لإنجاز «جامع التحف»)
   const spent=BUY.reduce((a,b)=>{const[c,id]=b.item.split(":");if(GONE_CATS.includes(c))return a;const it=itemOf(c,id);return a+(b.p!=null?b.p:it?(it.old!=null?it.old:it.price):0)},0);
   const td=per[today()]||{n:0};
@@ -363,15 +397,19 @@ function rngOf(seed){let h=2166136261;for(const c of String(seed))h=Math.imul(h^
   return()=>{h=h+0x6D2B79F5|0;let t=h;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296}}
 const BOTN=["Lena","Jonas","Mia","Paul","Emma","Felix","Hannah","Lukas","Sophie","Elias","Lea","Noah","Marie","Ben","Clara","Finn","Anna","Leon"];
 // منافسون آليّون ثابتون طوال الأسبوع: هدف كلٍّ منهم بين 20% و100% من متوسط خبرة المجموعة، مضروبًا في «قوة الروبوتات» من لوحة المدير (CFG.league.bots٪)، ويزداد يومًا بعد يوم
+// ولكل منافس حدّ أدنى ثابت طوال الأسبوع بين BOT_MIN[0] وBOT_MIN[1] خبرة، فلا يظهر أحد بصفر. مولّده منفصل، فلا تتغيّر الأسماء ولا الأهداف.
+// الحدّ ≤ 15، وعند التساوي يتقدّم المتعلّم (tableFor)، فلا يتأخر بسببه من جمع 15 خبرة أو أكثر. لا يُطبَّق إن كانت قوة الروبوتات 0.
+const BOT_MIN=[5,15];
 function makeBots(w,cl,base,prog){
-  const r=rngOf(w+"|"+cl.key),names=[...BOTN];
+  const r=rngOf(w+"|"+cl.key),fl=rngOf(w+"|"+cl.key+"|min"),names=[...BOTN],on=(CFG.league.bots??100)>0;
   for(let i=names.length-1;i>0;i--){const j=r()*(i+1)|0;[names[i],names[j]]=[names[j],names[i]]}
   const out=[],n=Math.max(0,TARGET-cl.m.length),tier=Math.min(...cl.m.map(m=>m.tier||0));
   for(let i=0;i<n;i++){
     const target=base*(.2+r()*.8)*(CFG.league.bots??100)/100,wts=[...Array(7)].map(()=>{const a=r(),b=r();return a<.2?0:.3+b});
     const tot=wts.reduce((a,b)=>a+b,0)||1,days=prog*7;let xp=0;
     for(let d=0;d<7;d++)xp+=target*wts[d]/tot*Math.max(0,Math.min(1,days-d));
-    out.push({id:"bot"+i,bot:1,name:names[i],av:"🤖",tier,xp:Math.round(xp)});
+    const mn=BOT_MIN[0]+Math.round(fl()*(BOT_MIN[1]-BOT_MIN[0]));
+    out.push({id:"bot"+i,bot:1,name:names[i],av:"🤖",tier,xp:on?Math.max(Math.round(xp),mn):Math.round(xp)});
   }
   return out;
 }
@@ -393,9 +431,13 @@ function tableFor(uid,w,docs,prevDocs,prog){
 /* مهام اليوم: تُحسب من سجلّ اليوم نفسه، ولكل مهمة مكتملة صندوق جواهر يُفتح مرة واحدة في اليوم */
 // المحطة تُحسب مكتملة في المهام مع تدريبها: محطات اليوم بالترتيب، والمحطة رقم j مكتملة إن أُنهي j+1 تدريب في اليوم
 const drillsOn=d=>QLOG.filter(q=>q[3]==="drill"&&dkey(q[0])===d).length;
+// كلمات المحطة: الكلمات الجديدة المسجّلة مع المحطة نفسها. الخادم يحفظ أوقات السجلّ بالثواني (مقرّبة)، فنبحث في ثانية قبل وقت المحطة وبعده؛
+// والمحطتان لا تقتربان أقل من 10 ثوانٍ، والمراجعات ليست كلمات جديدة، فلا يدخل في النافذة إلا كلمات هذه المحطة
+const ST_WIN=1000;
 function stPerfectAt(d){   // محطات اليوم المكتملة مع تدريبها التي لم يُخطأ فيها في أي كلمة
-  const lg=LOG.filter(x=>isNewF(x)&&dkey(x[0])===d),nd=drillsOn(d);
-  return STN.filter(s=>dkey(s[0])===d).sort((a,b)=>a[0]-b[0]).slice(0,nd).filter(s=>{const e=lg.filter(x=>x[0]>=s[0]&&x[0]<s[0]+(s[1]||5));return e.length&&e.every(x=>x[2]===2)}).length;
+  const ss=STN.filter(s=>dkey(s[0])===d).sort((a,b)=>a[0]-b[0]).slice(0,drillsOn(d));if(!ss.length)return 0;
+  const lo=ss[0][0]-ST_WIN,hi=ss[ss.length-1][0]+ST_WIN+50,lg=LOG.filter(x=>x[0]>=lo&&x[0]<hi&&isNewF(x));   // لا نقيّد السجلّ باليوم: محطة قبل منتصف الليل بلحظة قد تُقرَّب كلماتها إلى اليوم التالي
+  return ss.filter(s=>{const e=lg.filter(x=>x[0]>=s[0]-ST_WIN&&x[0]<s[0]+ST_WIN+(s[1]||5));return e.length&&e.every(x=>x[2]===2)}).length;
 }
 /* ملصق الشهر: يُكسب بإكمال محطة مع تدريبها في (أيام الشهر − 7) يومًا من ذلك الشهر (30 يومًا ← 23، وشباط 28 ← 21) */
 const MON_AR=["كانون الثاني","شباط","آذار","نيسان","أيار","حزيران","تموز","آب","أيلول","تشرين الأول","تشرين الثاني","كانون الأول"];
@@ -416,7 +458,15 @@ const QUESTS=[
    القطع بأوزان مختلفة (الأخيرة أندر)، والسحب محدّد بالتاريخ وعدد مرات الشهر، فيحسبه التطبيق والخادم بالنتيجة نفسها */
 const PZ_W=[10,10,10,10,8,6,6,4,3],PZ_N=PZ_W.length;
 const hrand=s=>{let h=2166136261;for(const c of s){h^=c.charCodeAt(0);h=Math.imul(h,16777619)}return (h>>>0)/4294967296};
-function pzMonth(m){const L=(Array.isArray(R.pz)?R.pz:[]).filter(x=>String(x[0]).slice(0,7)===m);return {claims:L.length,have:new Set(L.map(x=>x[1]).filter(x=>x>=0))}}
+// ألبوم البازل الدائم R.pza: القطع = اتحاد الألبوم وسجلّ المطالبات R.pz؛ وعدد المطالبات (للسحب) من R.pz وحده، والشهر الحالي لا يُقصّ منه شيء
+function pzMonth(m){const L=(Array.isArray(R.pz)?R.pz:[]).filter(x=>String(x[0]).slice(0,7)===m),have=new Set(L.map(x=>x[1]).filter(x=>x>=0));
+  const k=R.pza&&+R.pza[m]||0;for(let i=0;i<PZ_N;i++)if(k>>i&1)have.add(i);return {claims:L.length,have}}
+// يطوي كل قطع R.pz في الألبوم (اتحاد، فتكراره آمن). يُستدعى مع كل قطعة، قبل أي قصّ لـR.pz
+function pzFold(){const A=R.pza&&typeof R.pza==="object"?{...R.pza}:{};
+  for(const [d,p] of Array.isArray(R.pz)?R.pz:[])if(p>=0&&p<PZ_N){const m=String(d).slice(0,7);A[m]=(+A[m]||0)|1<<p}R.pza=A}
+const qdFold=cut=>{R.qdg=(+R.qdg||0)+sumAt(cut,2)};
+// جائزة أسبوع الدوري (يستعملها الخادم): يبقى آخر 52 أسبوعًا، وجوائز ما قبلها تُطوى في LG.hg فلا تنقص الجواهر
+function lgPush(h){LG.hist=cutKeep([...(LG.hist||[]),h],52,cut=>{LG.hg=(+LG.hg||0)+sumAt(cut.map(x=>[x&&x.g]),0)})}
 function pzDraw(d){
   const {claims,have}=pzMonth(d.slice(0,7)),miss=PZ_W.map((_,i)=>i).filter(i=>!have.has(i));if(!miss.length)return -1;
   let pool=hrand(d+":"+claims)<.5||claims-have.size>=20-PZ_N?miss:[...have];if(!pool.length)pool=miss;
@@ -441,7 +491,7 @@ function applyAt(ev,T,now,ctx){
     const t=now,last=LOG.length?LOG[LOG.length-1][0]:0;
     if(ctx.server&&t<=last+500)return "time";
     const ok=rewarded(P[k],k,t,LOG),b0=P[k].box||0,box=boxStep(b0,r,!ok);
-    P[k]={box,due:r===0?t:ok||b0===0?t+IV[box]*DAY:P[k].due,t};LOG.push([t,k,r,ok?(FREEU?3:0):2]);if(LOG.length>60000)LOG=LOG.slice(-60000);
+    P[k]={box,due:r===0?t:ok||b0===0?t+IV[box]*DAY:P[k].due,t};LOG.push([t,k,r,ok?(FREEU?3:0):2]);ckFold();
     if(ok&&!FREEU&&CFG.energy.perReviews){EN.rc=(EN.rc||0)+1;if(EN.rc%CFG.energy.perReviews===0)enAdd(1,t)}      // التدريب لا يشحن الطاقة
     return true;
   }
@@ -458,7 +508,7 @@ function applyAt(ev,T,now,ctx){
     if(!ws.length||ws.some(k=>P[k]||(ctx.words&&!ctx.words.has(k))))return "word";
     const miss=new Set((ev.miss||[]).map(String));
     const pw=new Set(R.pw||[]);   // كلمة كوفئ عليها قبل التصفير: تُعلَّم 4 فلا خبرة لها مرة ثانية
-    ws.forEach((k,i)=>{P[k]={box:1,due:now+IV[1]*DAY,t:now+i};LOG.push([now+i,k,miss.has(k)?1:2,FREEU||pw.has(k)?4:1])});STN.push([now,ws.length,!FREEU&&ws.some(k=>!pw.has(k))?1:0]);STV=0;return true;   // الدراسة الحرّة بلا جوهرة
+    ws.forEach((k,i)=>{P[k]={box:1,due:now+IV[1]*DAY,t:now+i};LOG.push([now+i,k,miss.has(k)?1:2,FREEU||pw.has(k)?4:1])});ckFold();STN.push([now,ws.length,!FREEU&&ws.some(k=>!pw.has(k))?1:0]);STV=0;return true;   // الدراسة الحرّة بلا جوهرة
   }
   if(T==="quiz"){
     const total=ev.total|0,ok=ev.ok|0,kind=String(ev.kind||"quiz").slice(0,8);
@@ -481,11 +531,12 @@ function applyAt(ev,T,now,ctx){
   if(T==="dwin"){
     if(ctx.server&&!ctx.dwinOk)return "dwin";const id=String(ev.id||"");if(!/^[A-Za-z0-9_-]{4,40}$/.test(id))return "id";
     if(!CFG.duel.gem)return "off";R.dw=Array.isArray(R.dw)?R.dw:[];if(R.dw.some(x=>x[0]===id))return "dup";
-    R.dw.push([id,CFG.duel.gem]);if(R.dw.length>2000)R.dw=R.dw.slice(-2000);return true;
+    R.dw.push([id,CFG.duel.gem]);R.dw=cutKeep(R.dw,2000,cut=>{R.dwg=(+R.dwg||0)+sumAt(cut,1)});return true;
   }
   if(T==="duel"){
     if(ctx.server&&!ctx.duelOk)return "duel";
-    const d=dkey(now);R.dd=duelDays().filter(x=>x!==d);R.dd.push(d);if(R.dd.length>400)R.dd=R.dd.slice(-400);return true;
+    const d=dkey(now);R.dd=ddRaw().filter(x=>x!==d);R.dd.push(d);
+    R.dd=cutKeep(R.dd,400,cut=>{const A=R.dda&&typeof R.dda==="object"?{...R.dda}:{};for(const x of cut){const m=x.slice(0,7);A[m]=((+A[m]||0)|1<<(+x.slice(8,10)-1))>>>0}R.dda=A});return true;
   }
   if(T==="buy"){
     const it=itemOf(ev.cat,ev.id);if(!it||it.hidden||it.streak||!it.price&&it.cat!=="power")return "item";
@@ -506,11 +557,11 @@ function applyAt(ev,T,now,ctx){
   if(T==="quest"){
     if(FREEU)return "free";const i=QUESTS.findIndex(q=>q.id===ev.id),d=dkey(now);if(i<0)return "id";
     if(QUESTS[i].pz){if(QUESTS[i].f(d)<QUESTS[i].goal)return "notyet";if(questGot(d,ev.id))return "dup";
-      const m=d.slice(0,7),p=pzDraw(d),had=pzMonth(m).have;R.pz=Array.isArray(R.pz)?R.pz:[];R.pz.push([d,p]);if(R.pz.length>800)R.pz=R.pz.slice(-800);
+      const m=d.slice(0,7),p=pzDraw(d),had=pzMonth(m).have;R.pz=Array.isArray(R.pz)?R.pz:[];R.pz.push([d,p]);pzFold();if(R.pz.length>800)R.pz=R.pz.slice(-800);
       const g=p<0||had.has(p)?CFG.gems.pdup:had.size===PZ_N-1?CFG.gems.puzzle:0;
-      R.qd=Array.isArray(R.qd)?R.qd:[];R.qd.push([d,ev.id,g]);if(R.qd.length>600)R.qd=R.qd.slice(-600);return true}
+      R.qd=Array.isArray(R.qd)?R.qd:[];R.qd.push([d,ev.id,g]);R.qd=cutKeep(R.qd,600,qdFold);return true}
     const g=CFG.gems.quest[i]||0;if(!g)return "off";if(QUESTS[i].f(d)<QUESTS[i].goal)return "notyet";if(questGot(d,ev.id))return "dup";
-    R.qd=Array.isArray(R.qd)?R.qd:[];R.qd.push([d,ev.id,g]);if(R.qd.length>600)R.qd=R.qd.slice(-600);return true;
+    R.qd=Array.isArray(R.qd)?R.qd:[];R.qd.push([d,ev.id,g]);R.qd=cutKeep(R.qd,600,qdFold);return true;
   }
   // طاقة الإجابات المتتالية: كل 5 إجابات صحيحة متتالية في الدرس، بحدّ أقصى في اليوم
   if(T==="combo"){

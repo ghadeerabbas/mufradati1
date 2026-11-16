@@ -27,7 +27,9 @@ function openScroll(){try{if(OPENSC>1)return;const rv=document.getElementById("r
 addEventListener("touchmove",()=>{OPENSC=2},{passive:true});addEventListener("wheel",()=>{OPENSC=2},{passive:true});
 // إشارة إلى تطبيق أندرويد: الواجهة الحقيقية رُسمت، فلتُخفَ شاشة البداية
 function appReady(){bootDone();try{if(window.MufApp&&MufApp.ready)setTimeout(()=>MufApp.ready(),120)}catch(e){}}setTimeout(bootDone,10000);</script>
-<style>html.boot,html.boot body{background:transparent!important}html.boot #login{background:transparent!important}html.boot #login>*,html.boot body>:not(#login){visibility:hidden}</style>
+<style>html.boot,html.boot body{background:transparent!important}html.boot #login{background:transparent!important}html.boot #login>*,html.boot body>:not(#login){visibility:hidden}#vbar{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;background:#253363;color:#fff;font-size:.85rem;font-weight:700;padding:6px 12px;text-align:center}
+#vbar button{border:0;border-radius:999px;background:#F4A126;color:#fff;font:inherit;padding:3px 12px;cursor:pointer}
+</style>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
@@ -748,8 +750,16 @@ body:not(.adm) header .avatar,body:not(.adm) header .who,body:not(.adm) header .
 body:not(.adm) .hrow{padding:8px 14px}
 body:not(.adm) .htop{gap:8px}
 .hcrs{display:none;align-items:center;gap:4px;min-width:0;flex:0 1 auto;max-width:52%;background:var(--soft);color:var(--hd);border:0;border-radius:999px;padding:6px 12px;font:inherit;font-size:.85rem;font-weight:800;cursor:pointer}
-.hcrs bdi{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.hcrs:after{content:"▾";opacity:.6;font-size:.75rem}
+.hcrs bdi{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}.hcrs.pick:after{content:"▾";opacity:.6;font-size:.75rem}
 body:not(.adm) .hcrs.has{display:inline-flex}
+/* شارة المستوى داخل شريط المنهج: تبرز قليلًا فوقه وتحته دون أن يزيد ارتفاعه */
+.hcrs{padding-inline-start:6px;padding-inline-end:9px;gap:3px;max-width:58%}.hcrs:not(.pick){cursor:default}
+.lvb{position:relative;flex:none;width:30px;height:34px;margin:-7px 0 -7px 0;display:block}
+.lvb img{width:100%;height:100%;display:block;filter:drop-shadow(0 1px 1px rgba(0,0,0,.18))}
+/* بعد 50: الرقم داخل الدرع مكان رقم الصور الأصلية وبحجمه، فوق النجوم. خط كبير مصغَّر بالتحويل فلا يكبّره حدّ أصغر خط في الهاتف */
+.lvb b{position:absolute;left:50%;top:53.5%;font-size:16px;font-weight:900;line-height:1;color:#fff;white-space:nowrap;letter-spacing:-.5px;text-shadow:0 1px 0 rgba(60,0,0,.45);transform:translate(-50%,-50%) scale(.52);pointer-events:none}
+.lvb b.d3{transform:translate(-50%,-50%) scale(.44)}.lvb b.d4{transform:translate(-50%,-50%) scale(.35)}
+@media (max-width:340px){.lvb{width:27px;height:31px;margin:-6px 0 -6px 0}.lvb b{transform:translate(-50%,-50%) scale(.5)}.lvb b.d3{transform:translate(-50%,-50%) scale(.41)}.lvb b.d4{transform:translate(-50%,-50%) scale(.33)}}
 .hflt{display:none;flex:none;width:34px;height:34px;border-radius:50%;border:0;background:var(--soft);color:var(--hd);font-size:1rem;cursor:pointer;position:relative;align-items:center;justify-content:center}
 body:not(.adm) .hflt.has{display:inline-flex}.hflt.act:after{content:"";position:absolute;top:3px;left:3px;width:9px;height:9px;border-radius:50%;background:#ff9600}
 .hgap{flex:1}
@@ -1070,6 +1080,9 @@ body:not(.adm):has(#review.on .unitw) .unitw{background:var(--ds-bg)}
 body:not(.adm) header{background:var(--ds-card);border-bottom:0;box-shadow:var(--sh-1)}
 body:not(.adm) .hrow{padding:var(--sp-2) var(--sp-4)}
 body:not(.adm) .hcrs{background:var(--ds-cream);color:var(--ds-navy);padding:7px 14px;font-size:var(--fs-sm);gap:6px}
+/* شريط المنهج مع شارة المستوى: حشوة أصغر من جهة الشارة، فيتّسع الاسم على الشاشات الصغيرة */
+body:not(.adm) .hcrs{padding:6px 10px 6px 5px;gap:4px}
+@media (max-width:380px){body:not(.adm) .hcrs{padding:5px 8px 5px 4px;gap:3px;font-size:.78rem;letter-spacing:-.1px}body:not(.adm) .htop{gap:6px}}
 body:not(.adm) .hcrs:after{content:"";width:7px;height:7px;border:solid currentColor;border-width:0 2px 2px 0;transform:rotate(45deg) translateY(-2px);opacity:.7}
 body:not(.adm) .hflt{width:38px;height:38px;background:var(--ds-bg);color:var(--ds-navy)}
 body:not(.adm) .hflt svg{width:19px;height:19px}
@@ -1900,7 +1913,7 @@ try{var SHL=JSON.parse(localStorage.getItem("muf_shell")||"null");
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="core.js?v=ca445042ea"></script>
+<script src="core.js?v=9ef4ef4607"></script>
 <script>
 // الوضع الليلي إعداد للجهاز نفسه: يبقى بعد تسجيل الخروج ومع أي حساب، ويُطبَّق قبل الدخول
 const DEV_DARK=()=>{try{return localStorage.getItem("muf_dark")}catch(e){return null}};
@@ -1965,10 +1978,10 @@ let EN={v:30,t:0},STN=[],STV=0,EVQ=[];   // الطاقة، والمحطات ال
 let P={},LOG=[],QLOG=[],QA=[],BUY=[],S={},E={},R={bank:0,ach:[],lv:1,ts:0},LG={tier:null,w:"",hist:[],ts:0}; // R: جواهر محفوظة من قبل التصفير
 const DEF_S={limit:15,dir:"de",goal:30,ts:0},DEF_E={theme:"classic",frame:"none",avatar:"🎓",sticker:"",confetti:"squares",title:"t0",ncolor:"none",dark:0,ts:0};
 function loadState(){
-  R=Object.assign({bank:0,ach:[],lv:1,ts:0},jget(K("reset"),{}));P=jget(K("progress"),{});LOG=jget(K("log"),[]);QLOG=jget(K("qlog"),[]);QA=jget(K("qa"),[]);BUY=jget(K("buy"),[]);EN=jget(K("energy"),{v:30,t:0});STN=jget(K("stations"),[]);STV=+st(K("stv"))||0;EVQ=jget(K("evq"),[]);LG=Object.assign({tier:null,w:"",hist:[],ts:0},jget(K("league"),{}));migrateLG();LGC={at:0,rows:null};
+  R=Object.assign({bank:0,ach:[],lv:1,ts:0},jget(K("reset"),{}));P=jget(K("progress"),{});LOG=jget(K("log"),[]);CK=jget(K("ck"),null);QLOG=jget(K("qlog"),[]);QA=jget(K("qa"),[]);BUY=jget(K("buy"),[]);EN=jget(K("energy"),{v:30,t:0});STN=jget(K("stations"),[]);STV=+st(K("stv"))||0;EVQ=jget(K("evq"),[]);LG=Object.assign({tier:null,w:"",hist:[],ts:0},jget(K("league"),{}));migrateLG();LGC={at:0,rows:null};
   S=Object.assign({},DEF_S,jget(K("settings"),{}));E=Object.assign({},DEF_E,jget(K("equip"),{}));
 }
-const save=()=>{if(!UID)return;st(K("reset"),JSON.stringify(R));st(K("progress"),JSON.stringify(P));st(K("settings"),JSON.stringify(S));st(K("log"),JSON.stringify(LOG));
+const save=()=>{if(!UID)return;st(K("reset"),JSON.stringify(R));st(K("progress"),JSON.stringify(P));st(K("settings"),JSON.stringify(S));st(K("log"),JSON.stringify(LOG));st(K("ck"),JSON.stringify(CK));
   st(K("qlog"),JSON.stringify(QLOG));st(K("qa"),JSON.stringify(QA));st(K("buy"),JSON.stringify(BUY));st(K("equip"),JSON.stringify(E));st(K("league"),JSON.stringify(LG));st(K("energy"),JSON.stringify(EN));st(K("stations"),JSON.stringify(STN));st(K("stv"),String(STV||0));st(K("evq"),JSON.stringify(EVQ))};
 const key=w=>w.de.trim().toLowerCase();
 const uniq=a=>{const s=new Set;return a.filter(w=>!s.has(w.k)&&s.add(w.k))};
@@ -2270,7 +2283,8 @@ function stationSteps1(words){
   // لا خطوتان متتاليتان للكلمة نفسها، وبين خطوات الكلمة الواحدة خطوتان أخريان على الأقل
   // الترتيب عشوائي في كل مرة: ترتيب الكلمات، ونوع التمرين الثالث، وأيّ تمرين جاهز يأتي أولًا
   const out=[],pend=[];words=shuffle([...words]);
-  const second=w=>({t:clozeOf(w)?"cloze":exOk(w)?"ex":"rev",w}),third=w=>{const r=Math.random();return {t:trOf(w)&&r<.35?"tr":writeOk(w)&&r<.6?"write":r<.8?"rev":"mc",w}};
+  const second=w=>({t:clozeOf(w)?"cloze":exOk(w)?"ex":"rev",w}),// «ترجم الجملة» و«اكتبها» أُلغيا: الخطوة الثالثة اختيار من متعدد، وبغير اتجاه الخطوة الثانية إن كانت اختيارًا (فلا يتكرّر السؤال نفسه)
+  third=(w,prev)=>({t:prev==="rev"?"mc":prev==="mc"?"rev":Math.random()<.5?"rev":"mc",w});
   const pick=a=>a.length?a[Math.floor(Math.random()*a.length)]:-1;
   const take=force=>{
     const last=out.length?out[out.length-1].w:null;
@@ -2286,8 +2300,8 @@ function stationSteps1(words){
   // منهج «ألماني · إنكليزي» (الكلمات التي لها en): الكلمة، ثم جملتها مباشرة، ثم تمارينها موزّعة كالعادة
   const seq=w=>!!(w.en&&w.ex);
   words.forEach((w,i)=>{if(twoIntros())take(true);out.push({t:"intro",w});
-    if(seq(w)){out.push({t:"ex",w,seq:1});pend.push({s:{t:clozeOf(w)?"cloze":"rev",w},next:third(w,i),ready:out.length+2})}
-    else pend.push({s:second(w),next:third(w,i),ready:out.length+2});take(false);});
+    if(seq(w)){out.push({t:"ex",w,seq:1});const s2={t:clozeOf(w)?"cloze":"rev",w};pend.push({s:s2,next:third(w,s2.t),ready:out.length+2})}
+    else{const s2=second(w);pend.push({s:s2,next:third(w,s2.t),ready:out.length+2})}take(false);});
   while(pend.length)take(true);
   return out;
 }
@@ -2313,31 +2327,6 @@ function stOpts(w,de){   // أربعة خيارات من النوع نفسه
   return pickOpts(w,uniq(W).filter(x=>x.k!==w.k&&x.ar!==w.ar&&x.de!==w.de));
 }
 // زر «لا أعرف» تحت الخيارات: يُحسب خطأً (فتعود الكلمة في آخر المحطة) ويُظهر الجواب الصحيح، بدل التخمين
-// تمرين الكتابة في المحطة: لكلمة قصيرة واحدة (بلا مسافات، حتى 14 حرفًا) تُكتب بحروفها في خانات
-const writeOk=w=>{const T=typeTarget(w);return !!T&&!/\s/.test(T)&&/^[A-Za-zÄÖÜäöüß-]+$/.test(T)&&T.length<=14};
-// خانات الكتابة: حرف في كل خانة، والخانة التالية مؤشّرة. mark=1 بعد التحقّق: كل حرف أخضر إن طابق أو أحمر، mark=2: الكلمة مكشوفة
-function wBoxes(T,v,mark){const L=[...T],tv=[...String(v||"")];
-  return L.map((ch,i)=>{const c=tv[i],cls=mark===2?"rv":mark?(c!=null&&c.toLowerCase()===ch.toLowerCase()?"rv":"wr"):i===tv.length?"cur":"";
-    return `<b class="${cls}">${mark===2?esc(ch):c!=null?esc(c):""}</b>`}).join("")}
-// خانات لعبة «اكتبها»: مثل خانات المحطة، مع مسافات العبارة في مكانها، والأحرف المكشوفة بالمساعدة خضراء
-function gBoxes(T,v,rev,mark){const tv=[...String(v||"").replace(/\s+/g,"")];let j=0;
-  return [...T].map(ch=>{if(ch===" ")return '<i class="sp"></i>';const i=j++,c=tv[i];
-    const cls=mark?(c!=null&&c.toLowerCase()===ch.toLowerCase()?"rv":"wr"):i<rev?"rv":i===tv.length?"cur":"";
-    return `<b class="${cls}">${c!=null?esc(c):""}</b>`}).join("")}
-// يعيد المسافات إلى ما كُتب في الخانات بحسب مكانها في الكلمة الصحيحة
-// «ترجم الجملة»: جملة المثال الألمانية، وتُبنى ترجمتها العربية من بطاقات (وبينها بطاقات زائدة)
-function trOf(w){
-  const o=orderOf(w);if(!o)return null;
-  const toks=o.ar.replace(/[.،,؛;:!?؟«»"“”…()\[\]]/g," ").split(/\s+/).filter(Boolean);
-  return toks.length>=2&&toks.length<=10?{de:o.de,ar:o.ar,toks}:null;
-}
-function trQ(w,pool){
-  const o=trOf(w),have=new Set(o.toks),extra=[];
-  for(const x of shuffle(pool)){if(x.k===w.k)continue;const ox=trOf(x);if(!ox)continue;
-    for(const tk of shuffle(ox.toks))if(!have.has(tk)&&extra.length<3){extra.push(tk);have.add(tk)}if(extra.length>=3)break}
-  return {o,tiles:shuffle([...o.toks,...extra]),picked:[]};
-}
-function withSpaces(T,v){const tv=[...String(v||"").replace(/\s+/g,"")];let j=0,out="";for(const ch of T){if(ch===" "){out+=" ";continue}if(j>=tv.length)break;out+=tv[j++]}return out+tv.slice(j).join("")}
 // صنف لون الجنس لبطاقة الاسم (g-der / g-die / g-das)
 const gCls=w=>{const n=w&&w.t==="n"&&String(w.de).match(/^(der|die|das)\s/i);return n?"g-"+n[1].toLowerCase():""};
 const IDK=`<button type="button" class="link idk" id="idk">لا أعرف</button>`;
@@ -2347,6 +2336,7 @@ function stationView(){
   const el=$("review"),S_=STS;
   if(!S_.steps){S_.steps=stationSteps(S_.words);S_.i=0}
   const st=S_.steps[S_.i],w=st.w,T=S_.steps.length;
+  if(st.t==="tr"||st.t==="write"){st.t="mc";delete st.q}   // خطوة من نوع أُلغي (من نسخة أقدم): تصير اختيارًا من متعدد فلا يتوقف التعلّم
   const head=`<div class="sess"><div class="sbar"><i style="width:${S_.i/T*100}%"></i></div><span>${isAdmin()?"🛤️ ":""}المحطة ${S_.n} · ${S_.i+1} من ${T}</span><button class="link" id="stQuit">خروج</button></div>`;
   const next=()=>{S_.i++;if(S_.i<S_.steps.length){stationView();scrollTo(0,0)}else finishStation()};
   const wordLine=`<div class="word de">${bigDe(w.de,1)}</div>`;
@@ -2378,41 +2368,6 @@ function stationView(){
       const bl=$("stBlank");bl.textContent=q.c.word;bl.classList.add("good");   // الجواب الصحيح يظهر في الفراغ بالأخضر دائمًا
       judge(ok,b,`<span dir="ltr">${esc(full)}</span>`,()=>speak(full))};
     el.querySelectorAll(".gopt").forEach(b=>b.onclick=()=>ansC(b));$("idk").onclick=()=>ansC(null);
-  }
-  else if(st.t==="write"){   // اكتب الكلمة: ترى المعنى، وتكتب الكلمة في خانات بعدد أحرفها، ومعك أزرار ä ö ü ß
-    const T=typeTarget(w),nn=nounOf(w);
-    el.innerHTML=comboHTML()+head+`<div class="box ${gCls(w)}"><span class="sttag">${TI("keyboard")} اكتبها</span><p class="ghint">اكتب الكلمة بالألمانية:</p>
-     <div class="qword" style="font-size:1.35rem">${esc(w.ar)}</div>${nn?`<div style="text-align:center;margin:-6px 0 6px"><b class="art art-${nn.art}" style="font-size:1.2rem">${nn.art}</b></div>`:""}
-     <div class="wwrap"><div class="wslots de" id="wLen">${wBoxes(T,"")}</div>
-     <input id="wIn" class="whid" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" dir="ltr" maxlength="${T.length}" aria-label="اكتب الكلمة"></div>
-     <div class="ukeys">${["ä","ö","ü","ß","Ä","Ö","Ü"].map(c=>`<button type="button" data-c="${c}">${c}</button>`).join("")}</div>${IDK}</div>
-     <button class="btn next" id="stNext">تحقّق</button>`;
-    // الكتابة مباشرة في الخانات: حقل كتابة شفاف فوقها يستقبل لوحة المفاتيح، والمسافات تُحذف لأن الكلمة بلا مسافات
-    const inp=$("wIn"),upd=()=>{const v=inp.value.replace(/\s+/g,"").slice(0,T.length);if(v!==inp.value)inp.value=v;$("wLen").innerHTML=wBoxes(T,v)};
-    inp.addEventListener("input",upd);inp.addEventListener("focus",()=>$("wLen").classList.add("foc"));inp.addEventListener("blur",()=>$("wLen").classList.remove("foc"));setTimeout(()=>inp.focus(),60);
-    el.querySelectorAll(".ukeys button").forEach(k=>k.onmousedown=e=>e.preventDefault());
-    el.querySelectorAll(".ukeys button").forEach(k=>k.onclick=()=>{if(inp.disabled)return;inp.value=(inp.value+k.dataset.c).slice(0,T.length);inp.focus();upd()});
-    const sub=`<span dir="ltr">${artHTML(w.de)}</span> = ${esc(w.ar)}`;
-    const go=()=>{if(S_.ans)return;if(!inp.value.trim()){inp.focus();return}const r=checkTyped(w,inp.value);inp.disabled=true;inp.blur();$("stNext").style.display="none";
-      $("wLen").innerHTML=wBoxes(T,inp.value,1);
-      judge(!!r.ok,inp,r.ok&&r.note?esc(r.note):sub,()=>speak(w.de))};
-    $("stNext").onclick=go;inp.onkeydown=e=>{if(e.key==="Enter")go()};
-    $("idk").onclick=()=>{if(S_.ans)return;inp.disabled=true;inp.blur();$("stNext").style.display="none";$("wLen").innerHTML=wBoxes(T,T,2);judge(false,null,sub,()=>speak(w.de))};
-  }
-  else if(st.t==="tr"){
-    if(!st.q)st.q=trQ(w,[...S_.words,...uniq(W)]);const q=st.q;
-    el.innerHTML=comboHTML()+head+`<div class="box"><span class="sttag">${TI("books")} ترجم الجملة</span><p class="ghint">رتّب البطاقات لتكوّن ترجمة الجملة:</p>
-     <div class="trde"><button type="button" class="say trsay" id="trSay" aria-label="استمع">${isAdmin()?I3("speaker"):LIC("speaker")}</button><span class="de" dir="ltr">${esc(q.o.de)}</span></div>
-     <div id="trT"></div>${IDK}</div><button class="btn next" id="stNext">تحقّق</button>`;
-    const draw=()=>{$("trT").innerHTML=`<div class="oline trline" id="oLine">${q.picked.map((ti,pi)=>`<button type="button" class="otile" data-p="${pi}">${esc(q.tiles[ti])}</button>`).join("")}</div>
-      <div class="obank trbank">${q.tiles.map((x,ti)=>q.picked.includes(ti)?`<span class="otile ghost">${esc(x)}</span>`:`<button type="button" class="otile" data-t="${ti}">${esc(x)}</button>`).join("")}</div>`;
-      $("trT").querySelectorAll(".otile[data-t]").forEach(b=>b.onclick=()=>{if(S_.ans)return;q.picked.push(+b.dataset.t);fx("tap");draw()});
-      $("trT").querySelectorAll(".otile[data-p]").forEach(b=>b.onclick=()=>{if(S_.ans)return;q.picked.splice(+b.dataset.p,1);draw()})};
-    draw();speak(q.o.de);$("trSay").onclick=()=>speak(q.o.de);
-    const sub=`<span class="de" dir="ltr">${esc(q.o.de)}</span><br>${esc(q.o.ar)}`;
-    const end=ok=>{$("stNext").style.display="none";$("trT").querySelectorAll(".otile").forEach(x=>x.disabled=true);$("oLine").classList.add(ok?"good":"bad");judge(ok,$("oLine"),sub)};
-    $("stNext").onclick=()=>{if(S_.ans||!q.picked.length)return;end(q.picked.map(i=>q.tiles[i]).join(" ")===q.o.toks.join(" "))};
-    $("idk").onclick=()=>{if(S_.ans)return;end(false)};
   }
   else{   // mc: الألمانية ← العربية · rev: العربية ← الألمانية
     if(!st.o)st.o=stOpts(w);const rev=st.t==="rev";
@@ -2826,6 +2781,7 @@ function openPuzzle(host,done){
   host.innerHTML=`<div class="chscene"><p class="chlab">صندوق المكافأة</p><div class="chbox shake">${CHEST}</div><p class="chhint">اضغط لفتحه!</p></div>`;
   const bf=host.closest(".bigfx")&&host.closest(".bigfx").querySelector("#bfGo");if(bf)bf.classList.add("pzwait");   // في شاشة المفاجأة: «متابعة» بعد فتح الصندوق
   host.querySelector(".chbox").onclick=()=>{const b=host.querySelector(".chbox");if(b.classList.contains("open"))return;
+    if(VMIS){if(bf)bf.classList.remove("pzwait");toast(I3("warning"),"حدّث التطبيق لفتح الصندوق","يتوفر تحديث");return}   // آلية رقم النسخة: لا نفتح صندوقًا قد يرفضه الخادم
     if(ev({type:"quest",id:"perf"})!==true){if(bf)bf.classList.remove("pzwait");toast(I3("warning"),"تعذّر فتح الصندوق","حاول مرة أخرى");return}
     b.classList.remove("shake");b.classList.add("open");fx("done");renderHeader();
     const r=pzToday(),full=r.g>=CFG.gems.puzzle&&r.g>CFG.gems.pdup,n=pzMonth(curMon()).have.size;
@@ -2872,6 +2828,7 @@ function openChest(id,host,done){
   const q=questList().find(x=>x.id===id);if(!q||!q.done||q.got)return;if(q.pz)return openPuzzle(host,done);
   host.innerHTML=`<div class="chscene"><p class="chlab">صندوق «${q.n}»</p><div class="chbox shake">${CHEST}</div><p class="chhint">اضغط لفتحه!</p></div>`;
   host.querySelector(".chbox").onclick=()=>{const b=host.querySelector(".chbox");if(b.classList.contains("open"))return;
+    if(VMIS){toast(I3("warning"),"حدّث التطبيق لفتح الصندوق","يتوفر تحديث");return}   // آلية رقم النسخة: لا نفتح صندوقًا قد يرفضه الخادم
     if(ev({type:"quest",id})!==true){toast(I3("warning"),"تعذّر فتح الصندوق","حاول مرة أخرى");return}
     b.classList.remove("shake");b.classList.add("open");b.insertAdjacentHTML("beforeend",[0,1,2,3,4].map(i=>`<i class="chg${i}">💎</i>`).join(""));fx("done");confetti(60);renderHeader();
     host.querySelector(".chhint").outerHTML=`<p class="chgot"><bdi dir="ltr">+${q.g}</bdi> جواهر ${isAdmin()?"💎":HIC("gem")}</p><button class="btn next" id="chOk">رائع!</button>`;
@@ -3266,7 +3223,6 @@ function LIC(k){const d={
 const GAMES=[
  {id:"cloze",ic:I3("pencil"),li:"pencil",n:"املأ الفراغ",d:"جملة ناقصة: اختر الكلمة المناسبة لها"},
  {id:"art",ic:I3("target"),li:"target",n:"der · die · das",d:"اختر أداة الاسم الصحيحة"},
- {id:"type",ic:I3("keyboard"),li:"keyboard",n:"اكتبها بالألمانية",d:"ترى المعنى فتكتب الكلمة بحروفها"},
  {id:"listen",ic:I3("headphones"),li:"headphones",n:"استمع وافهم",d:"تسمع الكلمة دون أن تراها: اختر معناها أو اكتبها"},
  {id:"match",ic:I3("puzzle"),li:"puzzle",n:"المطابقة السريعة",d:"طابق 6 كلمات بمعانيها بأسرع ما يمكن"},
  {id:"order",ic:I3("books"),li:"order",n:"رتّب الجملة",d:"ترى معنى الجملة بالعربية فتبني جملتها الألمانية بترتيب الكلمات"},
@@ -3275,7 +3231,7 @@ const GAMES=[
 ];
 // التحدي اليومي: أسئلة منوّعة، كلمات اليوم أولًا ثم ما تعلّمه قبلها
 const CHAL_N=8;
-function chalKind(w){const k=["mc"];if(clozeOf(w))k.push("cloze");if(nounOf(w))k.push("art");if(answersOf(w).length)k.push("type");if(orderOf(w))k.push("order");return k[Math.random()*k.length|0]}
+function chalKind(w){const k=["mc"];if(clozeOf(w))k.push("cloze");if(nounOf(w))k.push("art");if(orderOf(w))k.push("order");return k[Math.random()*k.length|0]}
 const qKindFor=(id,w)=>id==="chal"?chalKind(w):id;
 function startChal(){
   const all=learnedList();if(all.length<4){toast(I3("warning"),"تحتاج 4 كلمات متعلّمة على الأقل","");return}
@@ -3297,12 +3253,11 @@ function gamePool(id){
   const all=learnedList();
   if(id==="cloze")return all.filter(w=>clozeOf(w));
   if(id==="art")return all.filter(w=>nounOf(w));
-  if(id==="type")return all.filter(w=>answersOf(w).length);
   if(id==="listen")return canSpeak()&&!listenMuted()?all.filter(w=>answersOf(w).length):[];
   if(id==="order")return all.filter(w=>orderOf(w));
   return all;
 }
-const gameMin={cloze:4,art:4,type:4,listen:4,match:6,s5:4,order:4};
+const gameMin={cloze:4,art:4,listen:4,match:6,s5:4,order:4};
 // جملة المثال الأولى للكلمة مقسّمة إلى كلمات (من 3 إلى 9 كلمات)
 function orderOf(w){
   if(!w.ex||!w.exar)return null;const de=String(w.ex).split("\n")[0].trim(),ar=String(w.exar).split("\n")[0].trim();
@@ -3359,7 +3314,7 @@ function makeQ(kind,w){
   return {kind,w};
 }
 function nextMixed(){
-  const kinds=[["mc",learnedList()],["lmc",gamePool("listen")],["order",gamePool("order")],["cloze",gamePool("cloze")],["art",gamePool("art")],["type",gamePool("type")]].filter(([,p])=>p.length>=gameMin.cloze);
+  const kinds=[["mc",learnedList()],["lmc",gamePool("listen")],["order",gamePool("order")],["cloze",gamePool("cloze")],["art",gamePool("art")]].filter(([,p])=>p.length>=gameMin.cloze);
   const [kind,pool]=kinds[Math.random()*kinds.length|0];
   const last=GM&&GM.q?GM.q.w.k:null;const cand=pickWords(pool.filter(w=>w.k!==last),1);
   return makeQ(kind,cand[0]||pool[0]);
@@ -3393,14 +3348,6 @@ function gameView(){
     <div class="oline de" lang="de" id="oLine">${q.picked.map((ti,pi)=>`<button type="button" class="otile" data-p="${pi}">${esc(q.tiles[ti])}</button>`).join("")}</div>
     <div class="obank de" lang="de">${q.tiles.map((t,ti)=>q.picked.includes(ti)?`<span class="otile ghost">${esc(t)}</span>`:`<button type="button" class="otile" data-t="${ti}">${esc(t)}</button>`).join("")}</div>
     <button class="btn next" id="gCheck" ${q.picked.length?"":"disabled"}>تحقّق</button>`;
-  else if(q.kind==="type"){const T=typeTarget(w),cz=clozeOf(w);
-    body=`<p class="ghint">اكتب الكلمة بالألمانية${w.t==="n"?"، ومعها أداتها إن استطعت":""}:</p><div class="qword" style="font-size:1.3rem">${esc(w.ar)}</div><div style="text-align:center;margin-top:-8px"><span class="tag">${TYPE[w.t]||""}</span></div>
-    ${nounOf(w)?`<div class="tarts">${["der","die","das"].map(a=>`<button type="button" class="tart art-${a}${q.art===a?" on":""}" data-a="${a}">${a}</button>`).join("")}</div>`:""}
-    <div class="wwrap"><div class="wslots de${T.replace(/ /g,"").length>16?" many":""}" id="tLen">${gBoxes(T,"",q.rev||0)}</div><input id="gIn" class="whid" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" dir="ltr" maxlength="${T.replace(/ /g,"").length}" aria-label="اكتب الكلمة"></div>
-    <div class="ukeys">${["ä","ö","ü","ß","Ä","Ö","Ü"].map(c=>`<button type="button" data-c="${c}">${c}</button>`).join("")}</div>
-    <div class="thints"><span>مساعدة:</span><button type="button" data-h="letter">${isAdmin()?"🔤":LIC("letter")} حرف</button>${canSpeak()?`<button type="button" data-h="hear">${isAdmin()?"🔊":LIC("speaker")} استمع</button>`:""}${cz?`<button type="button" data-h="sent">${isAdmin()?"📝":LIC("text")} جملة</button>`:""}<button type="button" data-h="mix">${isAdmin()?"🧩":LIC("shuffle")} الأحرف</button></div>
-    <div id="tHelp"></div>
-    <button class="btn next" id="gCheck">تحقّق</button>`}
   el.innerHTML=gameHead()+`<div class="box" id="gBox">${body}<div id="gFb"></div>${q.kind==="lmc"||q.kind==="ltype"?'<button type="button" class="link nolisten" id="gNoL">لا أستطيع الاستماع الآن</button>':""}</div>`;
   $("gQuit").onclick=finishGame;
   if(q.kind==="lmc"||q.kind==="ltype"){const h=$("gHear");h.onclick=()=>speak(hearOf(w));const sl=$("gSlow");if(sl)sl.onclick=()=>speak(hearOf(w),1);if(!q.played){q.played=1;setTimeout(()=>speak(hearOf(w)),250)}
@@ -3424,48 +3371,15 @@ function gameView(){
     $("gCheck").onclick=()=>{if(GM.answered||!q.picked.length)return;const ok=normO(q.picked.map(i=>q.tiles[i]).join(" "))===normO(q.o.de);
       $("gCheck").style.display="none";el.querySelectorAll(".otile").forEach(x=>x.disabled=true);$("oLine").classList.add(ok?"good":"bad");if(ok)speak(q.o.de);answered(ok,$("oLine"))};
   }
-  if(q.kind==="type"||q.kind==="ltype"){
+  if(q.kind==="ltype"){
     const inp=$("gIn");setTimeout(()=>inp.focus(),50);
     el.querySelectorAll(".ukeys button").forEach(k=>k.onclick=()=>{const s=inp.selectionStart??inp.value.length,e=inp.selectionEnd??s;inp.value=inp.value.slice(0,s)+k.dataset.c+inp.value.slice(e);inp.focus();inp.setSelectionRange(s+1,s+1);inp.dispatchEvent(new Event("input"))});
     const go=()=>{if(GM.answered)return;if(!inp.value.trim()){inp.focus();return}
-      // «اكتبها»: الأحرف من الخانات، وتُعاد المسافات في مكانها من الكلمة، وتُضاف الأداة إن اختارها
-      const T=q.kind==="type"?typeTarget(w):"",val=q.kind==="type"?(q.art?q.art+" ":"")+withSpaces(T,inp.value):inp.value;
+      const val=inp.value;
       const r=checkTyped(w,val);inp.disabled=true;inp.blur();inp.classList.add(r.ok?"good":"bad");$("gCheck").style.display="none";
-      if(q.kind==="type")$("tLen").innerHTML=gBoxes(T,inp.value,q.rev||0,1);
       GM.typed={r,v:normT(val)};answered(!!r.ok,inp)};
     $("gCheck").onclick=go;inp.onkeydown=e=>{if(e.key==="Enter")go()};
-    if(q.kind==="type")bindTypeHints(q,w,inp);
   }
-}
-// وسائل المساعدة في تمرين الكتابة: عدد الأحرف ظاهر دائمًا، والباقي بالضغط. من استعمل أيًّا منها وأصاب تُحسب إجابته صحيحة بلا خبرة
-const typeTarget=w=>coreOf(answersOf(w)[0]||w.de)||lemmaOf(w);
-// خانات الأحرف داخل مستطيل الكتابة: تمتلئ بما يكتبه (بلا الأداة)، والأحرف المكشوفة بالمساعدة خضراء
-function lenHTML(T,typed,k){const tv=[...String(typed||"").replace(ART,"").replace(/\s+/g,"")];let i=0;
-  return [...T].map(ch=>{if(ch===" ")return '<i class="sp"></i>';const j=i++;return `<b class="${j<k?"rv":""}">${tv[j]!=null?esc(tv[j]):""}</b>`}).join("")}
-function bindTypeHints(q,w,inp){
-  const T=typeTarget(w),help=$("tHelp"),used=()=>{q.hint=1},N=T.replace(/ /g,"").length,
-    upd=()=>{const v=inp.value.replace(/\s+/g,"").slice(0,N);if(v!==inp.value)inp.value=v;const l=$("tLen");if(l)l.innerHTML=gBoxes(T,v,q.rev||0)};
-  inp.addEventListener("input",upd);upd();
-  inp.addEventListener("focus",()=>$("tLen").classList.add("foc"));inp.addEventListener("blur",()=>{const l=$("tLen");if(l)l.classList.remove("foc")});
-  document.querySelectorAll(".ukeys button").forEach(k=>k.onmousedown=e=>e.preventDefault());
-  document.querySelectorAll(".tart").forEach(b=>b.onclick=()=>{if(GM.answered)return;q.art=q.art===b.dataset.a?null:b.dataset.a;document.querySelectorAll(".tart").forEach(x=>x.classList.toggle("on",x.dataset.a===q.art));inp.focus()});
-  const INFO={letter:"🔤 حرف: يُكتب لك الحرف التالي من الكلمة. ويمكنك الضغط مرة أخرى لحرفٍ آخر.",hear:"🔊 استمع: تسمع نطق الكلمة الألمانية.",
-    sent:"📝 جملة: يظهر مثال الكلمة، وفيه فراغ مكانها.",mix:"🧩 الأحرف: تظهر أحرف الكلمة مخلوطة، فترتّبها بالضغط عليها."};
-  const asked=q.asked=q.asked||{};
-  document.querySelectorAll(".thints button").forEach(b=>b.onclick=async()=>{if(GM.answered)return;const h=b.dataset.h;
-    if(!asked[h]){if(!await uiDialog(INFO[h]+(q.hint?"":"\n\nإن استعملت المساعدة تُحسب إجابتك الصحيحة بلا خبرة."),{ok:"استعمل",cancel:"إلغاء"}))return;asked[h]=1}
-    if(GM.answered)return;used();
-    if(h==="letter"){const L=[...T.replace(/ /g,"")],tv=[...inp.value.replace(ART,"").replace(/\s+/g,"")];let ok=0;while(ok<tv.length&&ok<L.length&&tv[ok].toLowerCase()===L[ok].toLowerCase())ok++;   // ما كتبه صحيحًا من أول الكلمة يبقى، ويُضاف الحرف الذي بعده
-      q.rev=Math.min(Math.max((q.rev||0),ok)+1,L.length);let n=0,out="";for(const ch of T){if(ch===" "){out+=" ";continue}if(n++<q.rev)out+=ch;else break}
-      const nn=nounOf(w);inp.value=out.replace(/ /g,"");if(nn){q.art=nn.art;document.querySelectorAll(".tart").forEach(x=>x.classList.toggle("on",x.dataset.a===q.art))}upd();inp.focus()}
-    else if(h==="hear")speak(lemmaOf(w));
-    else if(h==="sent"){const c=clozeOf(w);if(c)help.innerHTML=`<div class="cloze de thelp">${esc(c.pre)}<span class="blank">_____</span>${esc(c.post)}</div>`;b.disabled=true}
-    else if(h==="mix"){const ls=shuffle([...T.replace(/ /g,"")].slice(q.rev||0));   // الأحرف الباقية بعد ما كُشف
-      help.innerHTML=`<div class="tmix de">${ls.map((c,i)=>`<button type="button" data-i="${i}">${esc(c)}</button>`).join("")}<button type="button" class="tback" aria-label="مسح">⌫</button></div>`;
-      help.querySelectorAll(".tmix button[data-i]").forEach(x=>x.onclick=()=>{if(GM.answered)return;inp.value+=x.textContent;x.disabled=true;x.dataset.u="1";upd()});
-      help.querySelector(".tback").onclick=()=>{if(GM.answered)return;const last=[...help.querySelectorAll(".tmix button[data-u]")].pop();if(!last)return;inp.value=inp.value.slice(0,-last.textContent.length);last.disabled=false;delete last.dataset.u;upd()};
-      b.disabled=true}
-  });
 }
 // بعد كل جواب: يُسجَّل للكلمات الصعبة، ثم يظهر التصحيح وزر التالي
 function answered(ok,el,auto){
@@ -3474,7 +3388,7 @@ function answered(ok,el,auto){
   (GM.qa=GM.qa||[]).push([w.k,ok?1:0]);
   // النتيجة في الشريط السفلي مثل المحطة، فتبقى الصفحة في شاشة واحدة بلا تمرير
   let fb="";const L_=x=>`<span class="fbl">${x}</span>`;
-  if(q.kind==="type"||q.kind==="ltype"){const r=GM.typed.r;
+  if(q.kind==="ltype"){const r=GM.typed.r;
     fb=r.ok?(q.hint?L_('<small>بمساعدة، بلا خبرة</small>'):"")+(r.note?L_(`<span class="fbnote">${esc(r.note)}</span>`):"")
       :L_(`<span class="gans de" dir="ltr">${diffHTML(coreOf(r.a)||r.a,coreOf(GM.typed.v))}</span>`)}
   else if(q.kind==="art"&&!ok){const nn=nounOf(w);fb=L_(`<span class="de art-${nn.art}" dir="ltr">${esc(nn.art+" "+nn.noun)}</span>`)}
@@ -3696,7 +3610,7 @@ function drawLeague(rows){
   box.onclick=e=>{const r=e.target.closest(".lgrow");if(r)showPlayer(r)};
   const html=`<div class="lghead"><span class="lgic">${TIERS[t][1]}</span><div><b>${tierName(t)}</b><small>${isAdmin()?"":LIC("stopwatch")}ينتهي الأسبوع <span id="lgLeft">${lgLeftTxt()}</span> · خبرتك هذا الأسبوع ${myXP}</small></div></div>
    <div class="tiers">${TIERS.map((x,i)=>`<span class="${i===t?"on":i>t?"lock":""}" title="${x[0]}">${x[1]}</span>`).join("")}</div>
-   ${n?`<div class="lglist">${rows.map(row).join("")}</div>`:'<div class="empty">${isAdmin()?"اكسب أول نقاط خبرة هذا الأسبوع لتنضمّ إلى مجموعتك في الدوري.":"ادرس محطة لتدخل دوري هذا الأسبوع."}</div>'}
+   ${VMIS?'<div class="empty">الترتيب قيد التحديث. حدّث التطبيق لترى ترتيبك الصحيح.</div>':n?`<div class="lglist">${rows.map(row).join("")}</div>`:`<div class="empty">${isAdmin()?"اكسب أول نقاط خبرة هذا الأسبوع لتنضمّ إلى مجموعتك في الدوري.":"ادرس محطة لتدخل دوري هذا الأسبوع."}</div>`}
    ${lastRes?`<p class="rnote" style="margin-top:8px">الأسبوع الماضي: المركز ${lastRes.rank} من ${lastRes.n} · ${lastRes.mv>0?"صعدت "+(isAdmin()?"⬆️":LIC("up")):lastRes.mv<0?"نزلت "+(isAdmin()?"⬇️":LIC("down")):"بقيت"}${lastRes.g?" · +"+lastRes.g+" "+(isAdmin()?"💎":HIC("gem")):""}</p>`:""}
 `;
   if(box.dataset.h!==html){box.innerHTML=html;box.dataset.h=html}
@@ -3928,18 +3842,20 @@ function ev(e){
 }
 // حالة الحساب كما حفظها الخادم، ثم تُعاد عليها الأحداث التي لم تصل بعد
 function applyServer(j){
-  const c=(typeof j.core==="string"?JSON.parse(j.core):j.core)||{},h0=(LG.hist||[]).length;
+  const c=(typeof j.core==="string"?JSON.parse(j.core):j.core)||{},h0=(LG.hist||[]).length,w0=h0?String((LG.hist[h0-1]||{}).w||""):"";
   // حذف المشرف بياناتِ هذا الحساب: يبدأ من الصفر هنا أيضًا (المظهر والإعدادات وما لم يُرسل بعد)
   if(c.wiped&&c.wiped>(+st(K("wiped"))||0)){st(K("wiped"),String(c.wiped));EVQ=[];E=Object.assign({},DEF_E,{ts:Date.now()});S=Object.assign({},DEF_S,{ts:Date.now()});st(K("giftSeen"),"[]");PREFLAST="";applyLook()}
   P=c.P||{};QLOG=c.QLOG||[];BUY=c.BUY||[];R=Object.assign({bank:0,ach:[],lv:1,ts:0},c.R||{});
   LG=Object.assign({tier:null,w:"",hist:[],ts:0},c.LG||{});EN=c.EN||{v:30,t:0};STN=c.STN||[];STV=c.STV||0;
   LOG=unpackLog(JSON.parse(j.log||"null"));QA=unpackQA(JSON.parse(j.qa||"null"));
+  if(j.ck!==undefined)CK=j.ck?JSON.parse(j.ck):null;   // نقطة حفظ السجل: تصل فقط حين تختلف
   for(const e of EVQ)applyEv(e,e.t,{admin:isAdmin()});
   let pr={};try{pr=JSON.parse(j.prefs||"{}")||{}}catch(e){}
   if(pr.E&&(pr.E.ts||0)>(E.ts||0))E=Object.assign({},DEF_E,pr.E);
   if(pr.S&&(pr.S.ts||0)>(S.ts||0)){S.dir=pr.S.dir||S.dir;S.ts=pr.S.ts}
   save();EC=null;
-  const hs=LG.hist||[];if(hs.length>h0&&h0+1===hs.length)leagueNews(hs[hs.length-1]);
+  // خبر الدوري حين يصل أسبوع واحد جديد (بالمقارنة بآخر أسبوع، لا بطول السجل الذي يقف عند 52)
+  const hs=LG.hist||[];if(hs.length&&(h0||hs.length===1)&&hs.filter(x=>String(x&&x.w||"")>w0).length===1)leagueNews(hs[hs.length-1]);
   setTimeout(staleStation,0);
 }
 // محطة بدأت ولم تنتهِ ولم يُضغط «خروج» (أُغلق التطبيق أو سُحب من الخلفية): تُعامل كالخروج، فتُستعاد الطاقة
@@ -3972,11 +3888,40 @@ async function checkUpdate(){
   try{const q=await fetch("index.html",{method:"HEAD",cache:"no-cache"});const v=q.ok&&(q.headers.get("etag")||q.headers.get("last-modified"));if(!v)return;
     if(VER0==null){VER0=v;return}if(v!==VER0){UPD=true;tryReload()}}catch(e){}
 }
-function tryReload(){
-  if(!UPD||STS||DRL||GM||RES||document.querySelector(".uidlg")||$("fbModal").style.display==="flex"||syncing)return;
-  const on=document.querySelector(".panel.on");if(on&&(on.id==="quiz"||on.id==="messages"))return;
-  location.reload();
+// ===== آلية رقم النسخة (المرحلة 0) =====
+// الخادم يرسل رقم نسخة المنطق المشترك (core.js) مع كل مزامنة. إن اختلف عن رقم نسخة التطبيق:
+// - يعرض التطبيق الرصيد والمستوى والسلسلة كما يحسبها الخادم، ويخفي ترتيب الدوري، ويوقف فتح الصناديق مؤقتًا،
+// - ويظهر شريط «يتوفر تحديث»، ويعيد التحميل وحده في وقت آمن: لا درس ولا نافذة ولا أحداث لم تصل إلى الخادم.
+// - إعادة التحميل التلقائية مرة واحدة لكل رقم خلال 10 دقائق؛ إن بقي الاختلاف فالخادم هو المتأخر، فيبقى الشريط دون إعادة.
+const CORE_V=((document.querySelector('script[src*="core.js?v="]')||{}).getAttribute?.("src")||"").replace(/^.*v=/,"");
+let VMIS=null;
+function verCheck(j){
+  const was=!!VMIS;VMIS=j&&j.cv&&CORE_V&&j.cv!==CORE_V?{sv:j.cv,sum:j.sum||null}:null;
+  if(VMIS){EC=null;let r={};try{r=JSON.parse(sessionStorage.getItem("muf_vrl")||"{}")}catch(e){}
+    VMIS.tried=r.sv===VMIS.sv&&Date.now()-(r.t||0)<10*60e3;if(!VMIS.tried){UPD=true;tryReload()}}
+  if(VMIS||was){verBar();renderHeader()}
 }
+function verBar(){let b=$("vbar");
+  if(!VMIS){if(b)b.remove();return}
+  if(!b){b=document.createElement("div");b.id="vbar";b.setAttribute("role","status");document.querySelector("header").appendChild(b)}   // داخل الترويسة: جزء من التخطيط يدفع المحتوى، لا يغطيه
+  b.innerHTML=VMIS.tried?'يجري تحديث الخادم، والأرقام المعروضة منه':'يتوفر تحديث للتطبيق <button type="button" id="vbarGo">تحديث الآن</button>';
+  const g=$("vbarGo");if(g)g.onclick=async()=>{if(EVQ.length){await syncNow()}UPD=true;if(!reloadSafe()){toast(I3("warning"),"يُحدَّث بعد إنهاء الدرس","");return}doReload()}}
+// الأرقام المعروضة: من الخادم ما دام الاختلاف قائمًا (لا تغيّر أي حساب في الخادم)
+{const _econ=econ;econ=function(){const e=_econ.apply(this,arguments);const s=VMIS&&VMIS.sum;
+  if(s){e.gems=s.gems;e.xp=s.xp;e.lv=s.lv;e.rest=s.rest;e.need=s.need;e.s={...e.s,streak:s.streak,today:s.today}}return e}}
+function reloadSafe(){
+  if(STS||DRL||GM||RES||(typeof DL!=="undefined"&&DL)||EVQ.length||syncing)return false;
+  if(document.querySelector(".uidlg,.bigfx")||$("fbModal").style.display==="flex")return false;
+  const on=document.querySelector(".panel.on");if(on&&(on.id==="quiz"||on.id==="messages"||on.id==="reading"||on.id==="math"||on.id==="helper"))return false;
+  return true}
+async function doReload(){
+  if(VMIS)try{sessionStorage.setItem("muf_vrl",JSON.stringify({sv:VMIS.sv,t:Date.now()}))}catch(e){}
+  // وضع «العمل بلا إنترنت»: نحذف الصفحة المحفوظة فتُطلب من الشبكة، لا النسخة القديمة
+  try{if(window.caches&&navigator.serviceWorker&&navigator.serviceWorker.controller){const c=await caches.open("muf-data-1");await c.delete(new Request(new URL(".",location.href).href))}}catch(e){}
+  location.reload()}
+let RLD=false;   // إعادة التحميل تُطلب مرة واحدة فقط
+function tryReload(){
+  if(RLD||!UPD||!reloadSafe())return;RLD=true;doReload()}
 checkUpdate();setInterval(checkUpdate,30*60000);
 document.addEventListener("visibilitychange",()=>{if(!document.hidden)checkUpdate()});
 let SHT=null;
@@ -3996,11 +3941,11 @@ async function syncNow(manual){
     if(key!==PREFLAST){if(await tmo(uref().set({sum,name:UNAME,prefs,updated:firebase.firestore.FieldValue.serverTimestamp()},{merge:true}),15000,"slow")!=="slow")PREFLAST=key}   // كتابة بطيئة لا توقف الحفظ: تكمل وحدها، وتُعاد في المرة القادمة
     const sent=EVQ.slice(0,300),tok=await auth.currentUser.getIdToken();VSIG=viewSig();
     const ac=new AbortController(),to=setTimeout(()=>ac.abort(),30000);   // في سفاري قد يعلق الطلب بلا جواب بعد مغادرة الصفحة والعودة: يُلغى بعد 30 ث ويُعاد لاحقًا
-    let r;try{r=await fetch(API+"/sync",{method:"POST",signal:ac.signal,headers:{"Content-Type":"application/json","Authorization":"Bearer "+tok},body:JSON.stringify({evs:sent,st:{r:FSC.r,w:FSC.w}})})}finally{clearTimeout(to)}const stSent={r:FSC.r,w:FSC.w};
+    let r;try{r=await fetch(API+"/sync",{method:"POST",signal:ac.signal,headers:{"Content-Type":"application/json","Authorization":"Bearer "+tok},body:JSON.stringify({evs:sent,st:{r:FSC.r,w:FSC.w},ckt:CK?CK.t:0,cv:CORE_V})})}finally{clearTimeout(to)}const stSent={r:FSC.r,w:FSC.w};
     const j=await r.json().catch(()=>({}));
     if(!r.ok)throw {code:r.status===403?"inactive":r.status===401?"auth":"server",message:j.error||String(r.status)};
     FSC.r-=stSent.r;FSC.w-=stSent.w;
-    EVQ=EVQ.slice(sent.length);applyServer(j);LGC.at=0;   // الدوري يُقرأ من جديد بعد كل حفظ
+    EVQ=EVQ.slice(sent.length);applyServer(j);LGC.at=0;verCheck(j);   // الدوري يُقرأ من جديد بعد كل حفظ
     lastSync=Date.now();syncErr="";ok=true;syncFails=0;setCloud();
     applyLook();econ();renderHeader();renderEnergy();
     if(manual){buildQueue();showCard()}
@@ -4012,7 +3957,8 @@ async function syncNow(manual){
   }catch(e){syncErr=e.code==="permission-denied"||e.code==="inactive"?"لا صلاحية":e.code==="auth"?"أعد تسجيل الدخول":e.code==="server"?"خطأ في الخادم، سيُحفظ لاحقًا":"لا يوجد اتصال، سيُحفظ لاحقًا";setCloud();
     // إعادة المحاولة تلقائيًا بفواصل تطول: 5 ث، 15، 30، دقيقة، ثم كل دقيقتين (إلا إن كان الخطأ صلاحية أو دخولًا)
     if(e.code!=="inactive"&&e.code!=="auth"&&e.code!=="permission-denied"&&EVQ.length){const d=[5,15,30,60,120][Math.min(syncFails,4)];syncFails++;schedSync(d*1000)}}
-  syncing=false;return ok;
+  syncing=false;if(ok&&VMIS&&!VMIS.tried&&UPD)tryReload();   // بعد انتهاء المزامنة: الآن يمكن إعادة التحميل إن كانت مطلوبة
+  return ok;
 }
 let syncFails=0;
 function schedSync(ms){if(!UID||isAdmin())return;clearTimeout(syncTimer);syncTimer=setTimeout(()=>syncNow(),ms||15000)}
@@ -4942,11 +4888,18 @@ async function renderAssign(uid){
 var FRC="",FRV=false,FRL=null,FRN={nf:0,nin:0},FRT=null,FRLT=null,DL=null,DLSEEN=new Set;
 const DUEL_N=10;
 const myLogin=()=>auth.currentUser?String(auth.currentUser.email||"").split("@")[0]:"";
-const seenAgo=t=>{if(!t)return "لم يظهر بعد";const m=Math.round((Date.now()-t)/60000);return m<60?"آخر ظهور قبل "+Math.max(1,m)+" دقيقة":m<1440?"آخر ظهور قبل "+Math.round(m/60)+" ساعة":"آخر ظهور قبل "+Math.round(m/1440)+" يوم"};
+// «آخر ظهور»: بالدقائق في الساعة الأولى، ثم بالساعة نفسها (اليوم أو أمس) بتوقيت هاتفك، ثم بالأيام. لا تقريب إلى الأعلى
+const seenAgo=(t,nw)=>{if(!t)return "لم يظهر بعد";nw=nw||Date.now();const m=Math.max(0,Math.floor((nw-t)/60000)),d=new Date(t),hm=String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");
+  if(m<1)return "آخر ظهور قبل أقل من دقيقة";if(m<60)return "آخر ظهور قبل "+(m===1?"دقيقة":m===2?"دقيقتين":m<=10?m+" دقائق":m+" دقيقة");
+  const day=x=>{const y=new Date(x);y.setHours(0,0,0,0);return y.getTime()},dd=Math.round((day(nw)-day(t))/864e5);
+  if(dd===0)return "آخر ظهور اليوم الساعة "+hm;if(dd===1)return "آخر ظهور أمس الساعة "+hm;
+  return "آخر ظهور قبل "+(dd===2?"يومين":dd<=10?dd+" أيام":dd+" يومًا")};
+// نشاط حقيقي: لمس أو نقر أو كتابة من المتعلّم. يُرسل مع النبضة التالية، فلا يُحسب فتح التطبيق وحده ولا إعادة تحميله ولا المزامنة
+let ACT=false;["pointerdown","keydown","touchstart"].forEach(k=>document.addEventListener(k,()=>{ACT=true},{capture:true,passive:true}));
 // نبضة: «أنا متصل» + هل وصلتني دعوة تحدٍّ؟ كل 3 ثوانٍ والتطبيق ظاهر إن كان له أصدقاء (لتصل الدعوة فورًا)، وإلا كل 12 ثانية أو دقيقة
 async function frTick(){
   clearTimeout(FRT);if(!UID||isAdmin())return;
-  if(!document.hidden){try{const j=await apiPost("/fr",{op:"tick"});const ch=j.nin!==FRN.nin;FRN={nf:j.nf,nin:j.nin};
+  if(!document.hidden){try{const act=ACT;ACT=false;const j=await apiPost("/fr",{op:"tick",act:act?1:0}).catch(e=>{if(act)ACT=true;throw e});const ch=j.nin!==FRN.nin;FRN={nf:j.nf,nin:j.nin};
     if(ch&&$("games").classList.contains("on")&&!GM&&!FRV)renderGames();
     if(j.inv&&(!DL||DL.end)&&!DLSEEN.has(j.inv.id)){DLSEEN.add(j.inv.id);if(DL)duelClose();duelInvited(j.inv)}}catch(e){}}
   FRT=setTimeout(frTick,FRN.nf?3e3:FRN.nin||FRV?12e3:60e3);
@@ -5158,7 +5111,7 @@ async function duelEnd(final){
   // إعادة التحدي مع نفس اللاعبين بضغطة؛ وإن سبقك أحدهم بالدعوة تظهر لك دعوته مباشرة
   const ag=$("dlAgain");if(ag){const others=dlPlayers(d).filter(u=>u!==DL.me);
     ag.onclick=async()=>{ag.disabled=true;
-      try{const j=await apiPost("/fr",{op:"tick"});if(j.inv&&others.includes(j.inv.from)&&!DLSEEN.has(j.inv.id)){DLSEEN.add(j.inv.id);duelClose();duelInvited(j.inv);return}}catch(e){}
+      try{const j=await apiPost("/fr",{op:"tick",act:1});if(j.inv&&others.includes(j.inv.from)&&!DLSEEN.has(j.inv.id)){DLSEEN.add(j.inv.id);duelClose();duelInvited(j.inv);return}}catch(e){}
       duelClose();duelStart(others)};
     const rp=()=>{if(!DL||!DL.end)return;frTick();DL.pt=setTimeout(rp,3000)};DL.pt=setTimeout(rp,3000)}
 }
@@ -5169,6 +5122,13 @@ const errTxt=(x,body)=>(body?"":x.msg+"\n"+(x.src==="server"?"الخادم":"ا�
 async function copyTxt(s,what){try{await navigator.clipboard.writeText(s)}catch(e){const a=document.createElement("textarea");a.value=s;a.style.position="fixed";a.style.opacity="0";document.body.appendChild(a);a.select();try{document.execCommand("copy")}catch(_){}a.remove()}toast("📋","نُسخ "+what,"")}
 const kb=n=>n>1048576?(n/1048576).toFixed(1)+" م.ب":Math.max(1,Math.round(n/1024))+" ك.ب";
 const BAKWHY={auto:"تلقائية",manual:"يدوية","before-restore":"قبل الاسترجاع"};
+// جدول ملخّصات الحسابات (لقطة أو تحقق من نسخة)
+// B: جدول للمقارنة؛ الخانة المختلفة عنه تُلوَّن
+const ACCT_ROWS=[["gems","الجواهر"],["earned","الجواهر المكتسبة"],["xp","الخبرة"],["lv","المستوى"],["streak","السلسلة"],["best","أطول سلسلة"],["reviews","المراجعات"],["words","الكلمات"],["mem","محفوظة"],["mast","راسخة"],["stations","المحطات"],["quests","صناديق المهام"],["duelWins","فوز التحديات"],["duelDays","أيام التحدي"],["tier","الدوري"],["weeks","أسابيع الدوري"],["lgg","جوائز الدوري"],["album","بازل مكتمل"],["buys","المشتريات"],["ach","الإنجازات"],["log","طول السجل"],["folded","مطويّ في الأرشيف"]];
+function acctTable(A,ttl,B){const rows=ACCT_ROWS;
+  const U=Object.entries(A);return `<div style="overflow-x:auto;margin-top:8px"><table class="acct" style="border-collapse:collapse;font-size:.8rem;width:100%"><tr><th style="text-align:right">${esc(ttl)}</th>${U.map(([u,a])=>`<th>${esc(a.name||"بلا اسم")}${a.no!=null?`<br><small style="font-weight:400">#${noTxt(a.no)}</small>`:""}<br><small dir="ltr" style="font-weight:400;color:var(--muted)">…${esc(String(u).slice(-6))}</small>${a.userDoc===false?'<br><small style="font-weight:400;color:var(--rd)">بلا وثيقة مستخدم</small>':""}</th>`).join("")}</tr>`+
+  rows.map(([k,l])=>`<tr><td>${l}</td>${U.map(([u,a])=>`<td style="text-align:center${B&&B[u]&&JSON.stringify(B[u][k])!==JSON.stringify(a[k])?";background:#fde68a;color:#222":""}">${a[k]??""}</td>`).join("")}</tr>`).join("")+
+  `<tr><td>قطع البازل</td>${U.map(([,a])=>`<td style="text-align:center;font-size:.7rem">${Object.entries(a.pz||{}).map(([m,n])=>m+": "+n).join("<br>")}</td>`).join("")}</tr></table></div>`}
 let ERRS=[];
 async function errCheck(){
   try{ERRS=(await apiPost("/errs",{})).items||[]}catch(e){return}
@@ -5176,24 +5136,53 @@ async function errCheck(){
   if(b){b.textContent=nw||"";b.classList.toggle("on",nw>0)}
   if(nw)toast("⚠️","أخطاء جديدة: "+nw,"افتح «الحماية» لتراها");
 }
+let BKBUSY=false,BKRID=null;const rid12=()=>{const a=new Uint8Array(9);crypto.getRandomValues(a);return [...a].map(x=>x.toString(36).padStart(2,"0")).join("").slice(0,16)};
+// وقت النسخة بالثواني، ومعرّفها المختصر (آخر أرقام المفتاح)، ليُعرف إن كانت نسختان مختلفتين فعلًا
+const bkTime=x=>new Date(x.at||0).toLocaleString("ar-u-nu-latn",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit",second:"2-digit"});
 async function renderSafe(){
   const el=$("safe");el.innerHTML='<div class="empty">جارٍ التحميل…</div>';
   let B=[],ok=true;try{B=(await apiPost("/backup",{op:"list"})).items||[]}catch(e){ok=false}
   try{ERRS=(await apiPost("/errs",{})).items||[]}catch(e){}
   st("muf_errSeen",String(Date.now()));const b=$("eBadge");if(b){b.textContent="";b.classList.remove("on")}
-  el.innerHTML=`<div class="rsec"><h3>🗄️ النسخ الاحتياطية</h3><p class="rnote">كل ليلة تُحفظ نسخة كاملة من بيانات المستخدمين في تخزين منفصل عن قاعدة البيانات، وتبقى آخر 14 نسخة. «تجربة» تفكّ النسخة وتفحصها دون أن تغيّر شيئًا.</p>
-    <button class="btn" id="bkNow" style="width:100%;margin:6px 0;background:var(--navy);color:#fff">نسخة الآن</button><div class="stmsg" id="bkMsg"></div>
-    ${!ok?'<div class="err">تعذّر تحميل النسخ.</div>':B.length?B.map(x=>`<div class="bkrow"><div><b>${fmt(x.at)}</b><small>${BAKWHY[x.why]||x.why||""} · ${x.n||0} وثيقة · ${x.users||0} مستخدم · ${kb(x.size||0)}</small></div><div class="bkbtns"><button class="btn bkT" data-k="${esc(x.key)}">تجربة</button><button class="btn bkR" data-k="${esc(x.key)}">استرجاع</button></div></div>`).join(""):'<div class="empty">لا نسخ بعد. أول نسخة تلقائية الليلة، أو اضغط «نسخة الآن».</div>'}</div>
+  el.innerHTML=`<div class="rsec"><h3>🗄️ النسخ الاحتياطية</h3><p class="rnote">كل ليلة تُحفظ نسخة كاملة من بيانات المستخدمين في تخزين منفصل عن قاعدة البيانات، وتبقى آخر 14 نسخة ليلية وآخر 5 نسخ يدوية، كلٌّ على حدة (النسخ الأقدم من هذا النظام لا تُحذف تلقائيًا). «تجربة» تفكّ النسخة وتفحصها دون أن تغيّر شيئًا.</p>
+    <button class="btn" id="bkNow" style="width:100%;margin:6px 0;background:var(--navy);color:#fff">نسخة الآن</button>
+    <button class="btn" id="bkSnap" style="width:100%;margin:0 0 6px">📋 لقطة الحسابات (توثيق الحالة)</button><div class="stmsg" id="bkMsg"></div><div id="bkOut"></div>
+    ${!ok?'<div class="err">تعذّر تحميل النسخ.</div>':B.length?B.map(x=>`<div class="bkrow"><div><b>${bkTime(x)}</b><small class="bkid" dir="ltr">${esc(String(x.key||"").slice(-10))}</small><small>${BAKWHY[x.why]||x.why||""} · ${x.n||0} وثيقة · ${x.users||0} مستخدم · ${kb(x.size||0)}</small></div><div class="bkbtns"><button class="btn bkV" data-k="${esc(x.key)}">تحقق كامل</button><button class="btn bkD" data-k="${esc(x.key)}">تنزيل</button><button class="btn bkT" data-k="${esc(x.key)}">تجربة</button><button class="btn bkR" data-k="${esc(x.key)}">استرجاع</button></div></div>`).join(""):'<div class="empty">لا نسخ بعد. أول نسخة تلقائية الليلة، أو اضغط «نسخة الآن».</div>'}</div>
    <div class="rsec"><h3>⚠️ الأخطاء</h3><p class="rnote">كل خطأ يحدث في التطبيق عند أي مستخدم، أو في الخادم، يظهر هنا مع عدد مرّاته وآخر وقت. اضغط على الخطأ لترى تفاصيله.</p>
     ${ERRS.length?`<div class="erbtns"><button class="btn" id="erCpAll">📋 نسخ كل الأخطاء</button><button class="btn" id="erAll">${I3("trash")} حذف كل الأخطاء</button></div>`+ERRS.map((x,i)=>`<div class="errwrap"><details class="errrow"><summary><b>${esc(x.msg)}</b><small>${x.src==="server"?"الخادم":"التطبيق"} · ${x.n} مرّة · آخرها ${fmt(x.last)} · ${x.users.length} مستخدم</small></summary>
       <pre>${esc(errTxt(x,1))}</pre><button class="btn erDel" data-id="${x.id}">${I3("trash")} حذف</button></details><button type="button" class="ercp" data-i="${i}" aria-label="نسخ الخطأ">📋</button></div>`).join(""):'<div class="empty">لا أخطاء 👍</div>'}</div>`;
   const msg=(t,c)=>{const m=$("bkMsg");m.textContent=t;m.className="stmsg "+(c||"")};
-  $("bkNow").onclick=async e=>{e.target.disabled=true;msg("جارٍ النسخ…");try{const r=await apiPost("/backup",{op:"now"});toast("🗄️","حُفظت نسخة",r.n+" وثيقة");renderSafe()}catch(err){e.target.disabled=false;msg("تعذّر النسخ: "+(err.detail||err.error||"تحقّق من الاتصال"),"bad")}};
+  $("bkSnap").onclick=async e=>{e.target.disabled=true;$("bkOut").innerHTML="";msg("جارٍ أخذ اللقطة…");try{const j=await apiPost("/backup",{op:"snap"});
+    $("bkOut").innerHTML=acctTable(j.accts,"الآن")+'<button class="btn" id="bkSnapDl" style="width:100%;margin-top:6px">تنزيل اللقطة ملفًّا</button>';msg("✓ لقطة "+fmt(j.at),"ok");
+    $("bkSnapDl").onclick=()=>{const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(j,null,1)],{type:"application/json"}));a.download="accounts-"+new Date(j.at).toISOString().slice(0,16).replace(/[:T]/g,"-")+".json";document.body.appendChild(a);a.click();a.remove()}}
+    catch(err){msg("تعذّر أخذ اللقطة: "+(err.detail||err.error||""),"bad")}e.target.disabled=false};
+  // «نسخة الآن»: ضغطة واحدة = نسخة واحدة. الزر معطّل ما دام الطلب جاريًا ولو أُعيد رسم الصفحة، ولكل ضغطة معرّف يبقى عند إعادة المحاولة بعد خطأ،
+  // فإن كانت النسخة قد حُفظت فعلًا يُرجعها الخادم ولا ينشئ أخرى
+  const bn=$("bkNow");if(BKBUSY){bn.disabled=true;msg("جارٍ النسخ…")}
+  bn.onclick=async()=>{if(BKBUSY)return;BKBUSY=true;const b0=$("bkNow");if(b0)b0.disabled=true;msg("جارٍ النسخ…");BKRID=BKRID||rid12();
+    try{const r=await apiPost("/backup",{op:"now",rid:BKRID});BKRID=null;BKBUSY=false;
+      if(r.pending)toast("🗄️","النسخة قيد الإنشاء","حدّث القائمة بعد قليل");else toast("🗄️",r.dup?"النسخة محفوظة من قبل":"حُفظت نسخة",(r.n||0)+" وثيقة");renderSafe()}
+    catch(err){BKBUSY=false;const b1=$("bkNow");if(b1)b1.disabled=false;msg("تعذّر النسخ: "+(err.detail||err.error||"تحقّق من الاتصال")+". إن أعدت المحاولة فلن تتكرّر النسخة إن كانت قد حُفظت.","bad")}};
   el.onclick=async e=>{
     const t=e.target.closest(".bkT"),r=e.target.closest(".bkR"),d=e.target.closest(".erDel"),all=e.target.closest("#erAll"),cp=e.target.closest(".ercp");
+    const v=e.target.closest(".bkV"),dl=e.target.closest(".bkD");
+    // تنزيل النسخة ملفًّا إلى هذا الجهاز
+    if(dl){dl.disabled=true;msg("جارٍ التنزيل…");try{const j=await apiPost("/backup",{op:"download",key:dl.dataset.k});const bin=atob(j.b64),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);
+      const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([u],{type:"application/gzip"}));a.download=j.name;document.body.appendChild(a);a.click();a.remove();msg("✓ نُزّلت النسخة ("+kb(j.size)+")","ok")}catch(err){msg("تعذّر التنزيل: "+(err.detail||err.error||""),"bad")}dl.disabled=false;return}
+    // تحقق كامل: تُعاد بناء الحسابات من النسخة وتُقارن بالحالية، بلا أي كتابة
+    if(v){v.disabled=true;$("bkOut").innerHTML="";msg("جارٍ التحقق الكامل…");try{const j=await apiPost("/backup",{op:"verify",key:v.dataset.k});const same=Object.values(j.diff).every(d=>!d.length);
+      // النتيجة: أيّ نسخة قورنت (معرّفها ووقت إنشائها من الملف نفسه)، ومتى قُرئت الحالة الآن، و«مطابقة» أو «توجد فروقات»
+      // تحقق ثانٍ في الصفحة: «مطابقة» فقط إن قال الخادم ذلك وكانت كل وثائق كل حساب مطابقة وكل عمود في الجدولين متساويًا
+      const eqT=Object.keys({...j.bak,...j.live}).every(u=>JSON.stringify(j.bak[u])===JSON.stringify(j.live[u])),docsOk=Object.values(j.accts||{}).every(a=>a.docSame);
+      const ok2=(j.result?j.result==="match":same)&&eqT&&(!j.accts||docsOk),clash=(j.result==="match")!==ok2,DN={core:"الحالة",log:"السجل",qa:"الأسئلة",ck:"نقطة الحفظ",gifts:"الهدايا"},ST={same:"مطابقة",diff:"مختلفة","missing-bak":"ليست في النسخة","missing-live":"ليست الآن"};
+      const acc=Object.entries(j.accts||{}).filter(([,a])=>!a.docSame||a.diff.length).map(([u,a])=>`<div class="rnote"><b>${esc(a.name||u)}</b>${a.userDoc===false?" (بلا وثيقة مستخدم)":""}: الوثائق: ${Object.entries(a.docs).filter(([,v])=>v!=="none").map(([k,v])=>DN[k]+" "+ST[v]).join("، ")}${a.diff.length?" · الملخّص يختلف في: "+esc(a.diff.map(k=>(ACCT_ROWS.find(r=>r[0]===k)||[k,k])[1]).join("، ")):""}<br><small dir="ltr">core: ${esc(a.coreUt.bak||"-")} → ${esc(a.coreUt.live||"-")}</small></div>`).join("");
+      const aug=o=>Object.fromEntries(Object.entries(o).map(([u,a])=>[u,{...a,name:((j.accts||{})[u]||{}).name||a.name,no:((j.accts||{})[u]||{}).no,userDoc:((j.accts||{})[u]||{}).userDoc}]));
+      const nm=Object.entries(j.accts||j.bak).map(([u,a])=>a.name||u),dup=[...new Set(nm.filter((x,i)=>nm.indexOf(x)!==i))];
+      msg((ok2?"✓ مطابقة":clash?"✗ تعارض في النتيجة، لا تعتمد عليها":"✗ توجد فروقات")+" · النسخة "+String(j.key||v.dataset.k)+" · أُنشئت "+bkTime({at:j.at})+" · قورنت "+bkTime({at:j.cmpAt||Date.now()}),ok2?"ok":"bad");
+      $("bkOut").innerHTML=(dup.length?`<div class="err">تنبيه: أكثر من حساب بالاسم نفسه: ${dup.map(esc).join("، ")}. كل عمود حساب مستقل (انظر آخر أرقام معرّفه تحت الاسم)، فقارن العمود نفسه بين الجدولين.</div>`:"")+acc+acctTable(aug(j.bak),"من النسخة",j.live)+acctTable(aug(j.live),"الآن")}catch(err){$("bkOut").innerHTML="";msg("تعذّر التحقق: "+(err.detail||err.error||""),"bad")}v.disabled=false;return}
     if(cp){copyTxt(errTxt(ERRS[+cp.dataset.i]),"الخطأ");return}
     if(e.target.closest("#erCpAll")){copyTxt(ERRS.map(x=>errTxt(x)).join("\n\n————————\n\n"),"كل الأخطاء");return}
-    if(t){t.disabled=true;msg("جارٍ فحص النسخة…");try{const j=await apiPost("/backup",{op:"test",key:t.dataset.k});
+    if(t){t.disabled=true;$("bkOut").innerHTML="";msg("جارٍ فحص النسخة…");try{const j=await apiPost("/backup",{op:"test",key:t.dataset.k});
       msg(j.ok?`✓ النسخة سليمة وقابلة للاسترجاع: ${j.n} وثيقة — `+Object.entries(j.per).sort((a,b)=>b[1]-a[1]).map(([k,v])=>k+" "+v).join("، "):"✗ في النسخة "+j.bad+" وثيقة تالفة",j.ok?"ok":"bad")}catch(err){msg("تعذّر فحص النسخة: "+(err.detail||err.error||""),"bad")}t.disabled=false;return}
     if(r){if(!await uiConfirm("استرجاع هذه النسخة؟ تعود بيانات كل المستخدمين كما كانت وقتها، ويضيع ما تغيّر بعدها."))return;
       if(!await uiConfirm("متأكد؟ قبل الاسترجاع تُحفظ نسخة من الوضع الحالي، فتستطيع التراجع بها."))return;
@@ -5672,9 +5661,13 @@ function navSync(){
   $("hFlt").classList.toggle("has",fv);$("hFlt").classList.toggle("act",!noFilter());
   if(!fv)document.body.classList.remove("fopen");
 }
+// شارة المستوى: صورة لكل مستوى من 1 إلى 50، وبعد 50 شارة بلا رقم يُكتب عليها المستوى الحقيقي
+function lvBadge(lv){lv=Math.max(1,Math.floor(+lv||1));const hi=lv>50;
+  return `<span class="lvb" title="${lv}"><img src="img/lv/${hi?"x":lv}.webp" alt="${lv}" width="30" height="34" decoding="async">${hi?`<b class="d${Math.min(4,String(lv).length)}">${lv}</b>`:""}</span>`}
 function hdrExtra(){
-  const c=$("hCrs"),many=MY_COURSES.filter(x=>COURSES[x]).length>1&&!isAdmin();
-  c.classList.toggle("has",many);setH(c,`<bdi>${esc((COURSES[COURSE]||{}).name||"")}</bdi>`);
+  const c=$("hCrs"),many=MY_COURSES.filter(x=>COURSES[x]).length>1&&!isAdmin(),nm=(COURSES[COURSE]||{}).name||"";
+  c.classList.toggle("has",!!nm&&!isAdmin());c.classList.toggle("pick",many);c.setAttribute("aria-label","المنهج: "+nm);
+  setH(c,lvBadge((EC||econ()).lv)+`<bdi dir="rtl">${esc(nm)}</bdi>`);
   navSync();
 }
 const btnVis=id=>{const b=$(id);return !!b&&b.style.display!=="none"};
@@ -5739,7 +5732,7 @@ function init(){
     document.querySelectorAll("nav button,.panel").forEach(x=>x.classList.remove("on"));
     hideFb();b.classList.add("on");$(b.dataset.p).classList.add("on");renderPanel(b.dataset.p);scrollTo(0,0)});
   ["fDay","fSubj","fLvl","fCore"].forEach(id=>$(id).onchange=()=>{refresh();navSync()});
-  $("hCrs").onclick=coursePicker;
+  $("hCrs").onclick=()=>{if($("hCrs").classList.contains("pick"))coursePicker()};
   // الضغط على أيقونة الرئيسية من قسم آخر يعيدك دائمًا إلى «المسار»
   document.querySelectorAll('#mainNav button[data-p="review"]').forEach(b=>b.addEventListener("click",()=>{if(!$("review").classList.contains("on"))HOMETAB="path"},true));
   $("hFlt").onclick=()=>{document.body.classList.toggle("fopen");if(document.body.classList.contains("fopen"))scrollTo(0,0)};
@@ -5756,7 +5749,7 @@ function init(){
   $("msgBtn").onclick=()=>{document.querySelectorAll("nav button,.panel").forEach(x=>x.classList.remove("on"));$("messages").classList.add("on");renderPanel("messages");scrollTo(0,0)};
   $("hAv").onclick=()=>{if(isAdmin()){goTab("users");scrollTo(0,0);return}   // المشرف: لا ملف شخصي، بل لوحة الإشراف
     document.querySelectorAll("nav button,.panel").forEach(x=>x.classList.remove("on"));$("profile").classList.add("on");renderPanel("profile");scrollTo(0,0)};
-  document.addEventListener("visibilitychange",()=>{if(document.hidden&&syncTimer)syncNow();else if(!document.hidden&&UID&&(EVQ.length||syncErr))syncNow()});
+  document.addEventListener("visibilitychange",()=>{if(document.hidden&&syncTimer)syncNow();else if(!document.hidden&&UID&&(EVQ.length||syncErr||Date.now()-lastSync>10*60e3))syncNow()});   // العودة بعد غياب طويل: مزامنة خفيفة تكشف أيضًا اختلاف النسخة
   // عاد الاتصال: نرسل ما تأخّر فورًا
   addEventListener("online",()=>{if(UID&&(EVQ.length||syncErr)){syncFails=0;syncNow()}});
 }
